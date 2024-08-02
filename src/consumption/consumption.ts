@@ -35,7 +35,7 @@ function isEndOfDay(qhour: Date): boolean {
 function isEndOfMonth(qhour: Date): boolean {
   const nqhour = new Date(qhour)
   nqhour.setMinutes(Math.floor(nqhour.getMinutes()/15)*15, 0, 0)
-  return nqhour.getMinutes() === 0 && nqhour.getHours() === 0 && nqhour.getDate() === 0
+  return nqhour.getMinutes() === 0 && nqhour.getHours() === 0 && nqhour.getDate() === 1
 }
 
 function prevHour(qhour: Date): Date {
@@ -266,7 +266,7 @@ export async function consumption(ds: DataSource) {
         }
       }
 
-      // Aggregate over day (if appropriate)
+      // Aggregate over month (if appropriate)
       if (isEndOfMonth(bcq.qhour)) {
         const begOfMonth = prevMonth(bcq.qhour)
         console.log(`[consumption.ts] Aggregating place <${bcq.cp.mbusPrimary}>${bcq.cp.name}. Month ${bcq.qhour}`)
