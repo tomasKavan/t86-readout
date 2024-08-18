@@ -9,7 +9,7 @@ const mbusMaster = new MbusMaster({
 
 mbusMaster.connect()
 
-mbusMaster.getData(2, function(err, data) {
+mbusMaster.getData(45, function(err, data) {
 
   console.log(err)
 

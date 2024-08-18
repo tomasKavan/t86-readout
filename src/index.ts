@@ -56,20 +56,26 @@ async function run() {
   let prevTime: Date | null = null
   while(1) {
     const now = new Date()
-    if (eachXMinQuarterly(10, prevTime, now)) {
-      // Each quartehour at 10th minute run readout
-      console.log(`--- Commence readout [${new Date()}] ---`)
-      await readout(AppDataSource) 
-      console.log(`--- Readout done [${new Date()}]---`)
-    }
-    if (eachXMinQuarterly(1, prevTime, now)) {
-      // Each quarterhour at 1st minute run consumption
-      console.log(`--- Note consumption [${new Date()}] ---`)
-      await consumption(AppDataSource) 
-      console.log(`--- Consumption noted [${new Date()}]---`)
+    try { 
+      if (eachXMinQuarterly(10, prevTime, now)) {
+        // Each quartehour at 10th minute run readout
+        console.log(`--- Commence readout [${new Date()}] ---`)
+        await readout(AppDataSource) 
+        console.log(`--- Readout done [${new Date()}]---`)
+      }
+      if (eachXMinQuarterly(1, prevTime, now)) {
+        // Each quarterhour at 1st minute run consumption
+        console.log(`--- Note consumption [${new Date()}] ---`)
+        await consumption(AppDataSource) 
+        console.log(`--- Consumption noted [${new Date()}]---`)
+      }
+    } catch (e) {
+      console.log(`ERROR:`)
+      console.log(e)
+      console.log(`---------------------------------`)
     }
     
-    // Wait 5 seconds
+    // Wait 1 minute
     console.log('Wait next tick in 1m')
     await wait(60000)
     prevTime = now
