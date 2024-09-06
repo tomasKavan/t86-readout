@@ -14,6 +14,7 @@ import {
 import { DataSource } from 'typeorm'
 import { readout } from './readout/readout'
 import { consumption } from './consumption/consumption'
+import express from 'express'
 
 const AppDataSource = new DataSource({
   type: 'mysql',
@@ -89,3 +90,54 @@ async function wait(ms): Promise<void> {
     }, ms)
   })
 }
+
+const app = express()
+
+app.get('/api/spotreba/:od/:do', async (req, res) => {
+  const odD = new Date(req.params.od + 'T00:00')
+  const doD = new Date(req.params.do + 'T00:00')
+
+  if (!odD || !(odD instanceof Date) || !doD || !(doD instanceof Date)) {
+    res.status(400)
+    res.send('Invalid input params. Path should be /api/spotreba/<YYYY-MM-DD>/<YYYY-MM-DD>')
+    return
+  }
+
+  odD.setDate(odD.getDate() + 1)
+  doD.setDate(doD.getDate() + 2)
+
+  console.log('[API]: Query /api/spotreba/:from/:to [' + odD + ' - ' + doD + ']')
+
+  const list = await AppDataSource.manager
+    .createQueryBuilder(ConsumptionDaily, 'cd')
+    .innerJoinAndSelect('cd.consumptionPlace', 'cp')
+    .where('cd.time >= :od', {od: odD})
+    .andWhere('cd.time < :do', {do: doD})
+    .getMany()
+  
+  const resData = {}
+  for (const item of list) {
+    let mb = resData[item.consumptionPlace.mbusPrimary]
+    if (!mb) {
+      mb = {
+        mbus: item.consumptionPlace.mbusPrimary,
+        sum: 0,
+        days: []
+      }
+      resData[item.consumptionPlace.mbusPrimary] = mb
+    }
+    const date = new Date(item.time)
+    //date.setDate(date.getDate() - 1)
+    mb.sum += item.value
+    mb.days.push({
+      day: date.toISOString().substring(0,10),
+      value: item.value
+    })
+  }
+
+    res.json(resData)
+})
+
+app.listen(8086, () => {
+  console.log('API Listening on port 8086')
+})

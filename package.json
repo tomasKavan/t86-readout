@@ -6,6 +6,7 @@
     "tsc-watch": "^6.2.0"
   },
   "dependencies": {
+    "express": "^4.19.2",
     "mysql2": "^3.10.3",
     "node-mbus": "^2.2.4",
     "reflect-metadata": "^0.2.2",
