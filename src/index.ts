@@ -93,6 +93,32 @@ async function wait(ms): Promise<void> {
 
 const app = express()
 
+// app.get('/api/stats/:od/:do/:step', async (req, res) => {
+//   const odD = new Date(req.params.od + 'T00:00')
+//   const doD = new Date(req.params.do + 'T00:00')
+//   const step = _getStep(req.params.step)
+
+//   if (!odD || !doD || !step) {
+//     res.status(400)
+//     res.send('Invalid input params. Path should be /api/stats/<YYYY-MM-DD>/<YYYY-MM-DD>/<qh|h|d|m|y>')
+//     return
+//   }
+// })
+
+// enum Steps {
+//   QHOUR = 'qh',
+//   HOUR = 'h',
+//   DAY = 'd',
+//   MONTH = 'm',
+//   YEAR = 'y'
+// }
+// function _getStep(str: string | null) : string | null {
+//   if (!str || !(str in Steps)) {
+//     return null
+//   }
+//   return str
+// }
+
 app.get('/api/spotreba/:od/:do', async (req, res) => {
   const odD = new Date(req.params.od + 'T00:00')
   const doD = new Date(req.params.do + 'T00:00')
@@ -136,6 +162,39 @@ app.get('/api/spotreba/:od/:do', async (req, res) => {
   }
 
     res.json(resData)
+})
+
+app.get('/api/meridlo', async (req, res) => {
+  console.log('[API]: Query /api/meridlo')
+  const list = await AppDataSource.manager
+    .createQueryBuilder(Meter, 'm')
+    .innerJoinAndSelect('m.type', 'mt')
+    // .innerJoinAndSelect('mt.medium', 'me')
+    .innerJoinAndSelect('m.installations', 'i')
+    .innerJoinAndSelect('i.consumptionPlace', 'cp')
+    .orderBy('m.id')
+    .getMany()
+  
+  res.json(list)
+})
+
+app.get('/api/meridlo-typ', async (req, res) => {
+  console.log('[API]: Query /api/meridlo-typ')
+  const list = await AppDataSource.manager
+    .createQueryBuilder(MeterType, 'mt')
+    .innerJoinAndSelect('mt.medium', 'me')
+    .getMany()
+  
+  res.json(list)
+})
+
+app.get('/api/medium', async (req, res) => {
+  console.log('[API]: Query /api/medium')
+  const list = await AppDataSource.manager
+    .createQueryBuilder(Medium, 'm')
+    .getMany()
+  
+  res.json(list)
 })
 
 app.listen(8086, () => {
