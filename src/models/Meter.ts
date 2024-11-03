@@ -1,4 +1,12 @@
-import { Column, Entity, Unique, OneToMany, ManyToOne, PrimaryGeneratedColumn, ManyToMany } from "typeorm";
+import { 
+  Column, 
+  Entity, 
+  Unique, 
+  OneToMany, 
+  ManyToOne, 
+  PrimaryGeneratedColumn, 
+  CreateDateColumn,
+  UpdateDateColumn } from "typeorm";
 import { MeterType } from "./MeterType";
 import { MeterInstallation } from "./MeterInstallation";
 
@@ -23,6 +31,21 @@ export class Meter {
 
   @Column('text')
   public notes: string
+
+  @CreateDateColumn({
+    type: 'datetime',
+    precision: 0,
+    default: () => 'CURRENT_TIMESTAMP(0)'
+  })
+  createdTime: Date
+
+  @UpdateDateColumn({
+    type: 'datetime',
+    precision: 0,
+    default: () => 'CURRENT_TIMESTAMP(0)',
+    onUpdate: 'CURRENT_TIMESTAMP(0)'
+  })
+  updatedTime: Date
 
   @OneToMany(() => MeterInstallation, mi => mi.meter)
   public installations: MeterInstallation[]

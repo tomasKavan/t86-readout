@@ -5,56 +5,56 @@ import { ReadoutLogEntryStatus } from "../models/MeterReadoutLog";
 const M15 = 15
 const M15_S = M15 * 60
 const M15_MS = M15_S * 1000 
+const H_MS = M15_S * 4
+const D_MS = H_MS * 24
 
 function nextQhour(qhour: Date): Date {
-  const nqhour = new Date(qhour)
-  nqhour.setMinutes(Math.floor(nqhour.getMinutes()/15)*15, 0, 0)
-  nqhour.setTime(nqhour.getTime() + M15_MS)
-  return nqhour
+  const ts = qhour.getTime()
+  const qts = Math.floor(ts/ M15_MS) * M15_MS
+  return new Date(qts + M15_MS)
 }
 
 function prevQhour(qhour: Date): Date {
-  const nqhour = new Date(qhour)
-  nqhour.setMinutes(Math.floor(nqhour.getMinutes()/15)*15, 0, 0)
-  nqhour.setTime(nqhour.getTime() - M15_MS)
-  return nqhour
+  const ts = qhour.getTime()
+  const qts = Math.floor(ts/ M15_MS) * M15_MS
+  return new Date(qts - M15_MS)
 }
 
 function isEndOfHour(qhour: Date): boolean {
-  const nqhour = new Date(qhour)
-  nqhour.setMinutes(Math.floor(nqhour.getMinutes()/15)*15, 0, 0)
-  return nqhour.getMinutes() === 0
+  const ts = qhour.getTime()
+  const qts = Math.floor(ts/ M15_MS) * M15_MS
+  return qts % H_MS === 0
 }
 
 function isEndOfDay(qhour: Date): boolean {
-  const nqhour = new Date(qhour)
-  nqhour.setMinutes(Math.floor(nqhour.getMinutes()/15)*15, 0, 0)
-  return nqhour.getMinutes() === 0 && nqhour.getHours() === 0
+  const ts = qhour.getTime()
+  const qts = Math.floor(ts/ M15_MS) * M15_MS
+  return qts % D_MS === 0
 }
 
 function isEndOfMonth(qhour: Date): boolean {
-  const nqhour = new Date(qhour)
-  nqhour.setMinutes(Math.floor(nqhour.getMinutes()/15)*15, 0, 0)
+  const ts = qhour.getTime()
+  const qts = Math.floor(ts/ M15_MS) * M15_MS
+  const nqhour = new Date(qts)
   return nqhour.getMinutes() === 0 && nqhour.getHours() === 0 && nqhour.getDate() === 1
 }
 
 function prevHour(qhour: Date): Date {
-  const nqhour = new Date(qhour)
-  nqhour.setMinutes(Math.floor(nqhour.getMinutes()/15)*15, 0, 0)
-  nqhour.setHours(nqhour.getHours() - 1)
-  return nqhour
+  const ts = qhour.getTime()
+  const qts = Math.floor(ts/ M15_MS) * M15_MS
+  return new Date(qts - H_MS)
 }
 
 function prevDay(qhour: Date): Date {
-  const nqhour = new Date(qhour)
-  nqhour.setMinutes(Math.floor(nqhour.getMinutes()/15)*15, 0, 0)
-  nqhour.setDate(nqhour.getDate() - 1)
-  return nqhour
+  const ts = qhour.getTime()
+  const qts = Math.floor(ts/ M15_MS) * M15_MS
+  return new Date(qts - D_MS)  
 }
 
 function prevMonth(qhour: Date): Date {
-  const nqhour = new Date(qhour)
-  nqhour.setMinutes(Math.floor(nqhour.getMinutes()/15)*15, 0, 0)
+  const ts = qhour.getTime()
+  const qts = Math.floor(ts/ M15_MS) * M15_MS
+  const nqhour = new Date(qts)
   nqhour.setMonth(nqhour.getMonth() - 1)
   return nqhour
 }
@@ -107,7 +107,7 @@ export async function consumption(ds: DataSource) {
   insts.forEach(cp => {
     cp.installedMeters.forEach(mi => {
       let time = mi.lockedReadoutBefore ? mi.lockedReadoutBefore : mi.installation
-      while (time < qhEnd) {
+      while (time.getTime() < qhEnd.getTime()) {
         time = nextQhour(time)
         qhours.push({
           qhour: time,

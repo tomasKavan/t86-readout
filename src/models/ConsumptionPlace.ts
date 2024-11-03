@@ -21,6 +21,11 @@ export class ConsumptionPlace {
   @Column("text")
   public installationDetails: string
 
+  @Column({
+    default: true
+  })
+  public consumptionProcessingEnabled: boolean
+
   @ManyToOne(() => Medium, (medium) => medium.consumptionPlaces, {
     eager: true, 
     onDelete: "RESTRICT",

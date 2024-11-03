@@ -1,4 +1,11 @@
-import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { 
+  Column, 
+  Entity, 
+  ManyToOne, 
+  OneToMany, 
+  PrimaryGeneratedColumn, 
+  CreateDateColumn,
+  UpdateDateColumn } from "typeorm";
 import { ConsumptionPlace } from "./ConsumptionPlace";
 import { Meter } from "./Meter";
 import { MeterReadoutLog } from "./MeterReadoutLog";
@@ -36,4 +43,32 @@ export class MeterInstallation{
 
   @Column("text")
   public notes: string
+
+  @CreateDateColumn({
+    type: 'datetime',
+    precision: 0,
+    default: () => 'CURRENT_TIMESTAMP(0)'
+  })
+  createdTime: Date
+
+  @UpdateDateColumn({
+    type: 'datetime',
+    precision: 0,
+    default: () => 'CURRENT_TIMESTAMP(0)',
+    onUpdate: 'CURRENT_TIMESTAMP(0)'
+  })
+  updatedTime: Date
 }
+
+// TODO - Triggers / consistency checks
+//
+// 1. One place can have only 1 meter installed at a time.
+//    Check CREATE, UPDATE[installation, removal].
+// 2. LockedReadoutBefore can be only within installation interval.
+//    Check CREATE, UPDATE[installation, removal, lockedReadoutBefore].
+// 3. SET of lockedReadoutBefore deletes all processed consumption
+//    latter than new lockedReadoutBefore value. Also all newer installations'
+//    lockedReadoutBefore must become nulled.
+// 4. When DELETED all consumptions after (including) installation date must be
+//    also deleted and all newer installations' lockedReadoutBefore must 
+//    become nulled.

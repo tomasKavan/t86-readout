@@ -1,4 +1,11 @@
-import { Column, Entity, ManyToOne, OneToMany, PrimaryColumn } from "typeorm";
+import { 
+  Column, 
+  Entity, 
+  ManyToOne, 
+  OneToMany, 
+  PrimaryColumn, 
+  CreateDateColumn,
+  UpdateDateColumn } from "typeorm";
 import { Medium } from "./Medium";
 import { Meter } from "./Meter";
 
@@ -18,6 +25,21 @@ export class MeterType {
 
   @Column('int')
   public rescaleOrder: number
+
+  @CreateDateColumn({
+    type: 'datetime',
+    precision: 0,
+    default: () => 'CURRENT_TIMESTAMP(0)'
+  })
+  createdTime: Date
+
+  @UpdateDateColumn({
+    type: 'datetime',
+    precision: 0,
+    default: () => 'CURRENT_TIMESTAMP(0)',
+    onUpdate: 'CURRENT_TIMESTAMP(0)'
+  })
+  updatedTime: Date
 
   @ManyToOne(() => Medium, {
     eager: true, 
