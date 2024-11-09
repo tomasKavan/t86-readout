@@ -8,6 +8,7 @@ import {
   UpdateDateColumn } from "typeorm";
 import { Medium } from "./Medium";
 import { Meter } from "./Meter";
+import { MeterTypeUnit } from "./MeterTypeUnit";
 
 @Entity()
 export class MeterType {
@@ -20,11 +21,11 @@ export class MeterType {
   @Column()
   public model: string
 
-  @Column('int')
-  public valueRecordId: number
+  @OneToMany(() => Meter, (m) => m.type)
+  public meters: Meter[]
 
-  @Column('int')
-  public rescaleOrder: number
+  @OneToMany(() => MeterTypeUnit, mtu => mtu.meterType)
+  public units: MeterTypeUnit[]
 
   @CreateDateColumn({
     type: 'datetime',
@@ -40,14 +41,4 @@ export class MeterType {
     onUpdate: 'CURRENT_TIMESTAMP(0)'
   })
   updatedTime: Date
-
-  @ManyToOne(() => Medium, {
-    eager: true, 
-    onDelete: 'RESTRICT',
-    nullable: false
-  })
-  public medium: Medium
-
-  @OneToMany(() => Meter, (m) => m.type)
-  public meters: Meter[]
 }

@@ -6,9 +6,10 @@ import {
   ManyToOne, 
   PrimaryGeneratedColumn, 
   CreateDateColumn,
-  UpdateDateColumn } from "typeorm";
-import { MeterType } from "./MeterType";
-import { MeterInstallation } from "./MeterInstallation";
+  UpdateDateColumn 
+} from "typeorm"
+import { MeterType } from "./MeterType"
+import { SiteMeterInstallation } from "./SiteMeterInstallation"
 
 @Entity()
 @Unique(['type', 'serialNumber'])
@@ -16,7 +17,7 @@ export class Meter {
   @PrimaryGeneratedColumn()
   public readonly id: number
 
-  @ManyToOne(() => MeterType, (mt) => mt.meters, {
+  @ManyToOne(() => MeterType, (mt) => mt.meters, {
     eager: true, 
     onDelete: 'RESTRICT', 
     nullable: false
@@ -26,18 +27,18 @@ export class Meter {
   @Column('varchar')
   public serialNumber: string
 
-  @Column('int')
-  public mbusSecondary: number
-
   @Column('text')
   public notes: string
+
+  @OneToMany(() => SiteMeterInstallation, smi => smi.meter)
+  public installations: SiteMeterInstallation[]
 
   @CreateDateColumn({
     type: 'datetime',
     precision: 0,
     default: () => 'CURRENT_TIMESTAMP(0)'
   })
-  createdTime: Date
+  createdUTCTime: Date
 
   @UpdateDateColumn({
     type: 'datetime',
@@ -45,8 +46,5 @@ export class Meter {
     default: () => 'CURRENT_TIMESTAMP(0)',
     onUpdate: 'CURRENT_TIMESTAMP(0)'
   })
-  updatedTime: Date
-
-  @OneToMany(() => MeterInstallation, mi => mi.meter)
-  public installations: MeterInstallation[]
+  updatedUTCTime: Date
 }
