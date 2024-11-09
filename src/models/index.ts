@@ -16,7 +16,27 @@ import { SiteMeterInstallation } from './SiteMeterInstallation'
 import { SiteMeterInstallationMBus } from './SiteMeterInstallationMbus'
 import { SiteMeterInstallationMap } from './SiteMeterInstallationMap'
 
+const modelsArray = [
+  DataSeries, 
+  DataSeriesQhourly,
+  DataSeriesHourly,
+  DataSeriesDaily,
+  DataSeriesMonthly,
+  GeoLocation,
+  Meter,
+  MeterType,
+  MeterTypeUnit,
+  MeterTypeUnitMbus,
+  Method,
+  MethodMBus,
+  Site,
+  SiteMeterInstallation,
+  SiteMeterInstallationMBus,
+  SiteMeterInstallationMap
+]
+
 export {
+  modelsArray,
   DataSeries, 
   DataSeriesQhourly,
   DataSeriesHourly,

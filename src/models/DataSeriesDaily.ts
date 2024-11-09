@@ -4,10 +4,9 @@ import {
   ManyToOne, 
   Unique,
   Column 
-} from "typeorm";
-import { DataSeries } from "./DataSeries";
+} from "typeorm"
+import { DataSeries } from "./DataSeries"
 
-  
 @Entity()
 @Unique(['dataSeries', 'localTime'])
 export class DataSeriesDaily {
@@ -20,9 +19,9 @@ export class DataSeriesDaily {
   })
   public dataSeries: DataSeries
 
-  @Column("datetime", { 
-    precision: 0, 
-    nullable: false
+  @Column("datetime", {  
+    nullable: false,
+    precision: 0
   })
   public localTime: Date 
 

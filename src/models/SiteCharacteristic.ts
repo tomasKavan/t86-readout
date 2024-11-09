@@ -10,6 +10,7 @@ import {
 import { Site } from "./Site"
 import { SiteMeterInstallationMap } from "./SiteMeterInstallationMap"
 import { SiteLog } from "./SiteLog"
+import { DataSeries } from "./DataSeries"
 
 export enum CharacteristicType {
   ELECTRICITY = 'elec',
@@ -92,6 +93,9 @@ export class SiteCharacteristic {
 
   @OneToMany(() => SiteLog, sl => sl.characteristic)
   public log: SiteLog[]
+
+  @OneToMany(() => DataSeries, ds => ds.siteCharacteristic)
+  public dataSeries: DataSeries[]
 
   @CreateDateColumn({
     type: 'datetime',

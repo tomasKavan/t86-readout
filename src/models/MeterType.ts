@@ -6,7 +6,6 @@ import {
   PrimaryColumn, 
   CreateDateColumn,
   UpdateDateColumn } from "typeorm";
-import { Medium } from "./Medium";
 import { Meter } from "./Meter";
 import { MeterTypeUnit } from "./MeterTypeUnit";
 
@@ -32,7 +31,7 @@ export class MeterType {
     precision: 0,
     default: () => 'CURRENT_TIMESTAMP(0)'
   })
-  createdTime: Date
+  createdUTCTime: Date
 
   @UpdateDateColumn({
     type: 'datetime',
@@ -40,5 +39,5 @@ export class MeterType {
     default: () => 'CURRENT_TIMESTAMP(0)',
     onUpdate: 'CURRENT_TIMESTAMP(0)'
   })
-  updatedTime: Date
+  updatedUTCTime: Date
 }

@@ -4,7 +4,10 @@ import { MethodMBus } from "./MethodMbus";
 
 @ChildEntity()
 export class SiteMeterInstallationMBus extends SiteMeterInstallation {
-  @ManyToOne(() => MethodMBus, m => m.installations)
+  @ManyToOne(() => MethodMBus, m => m.installations, {
+    onDelete: 'RESTRICT',
+    nullable: false
+  })
   public method: MethodMBus
 
   @Column('int')

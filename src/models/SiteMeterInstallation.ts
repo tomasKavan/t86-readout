@@ -17,13 +17,22 @@ export class SiteMeterInstallation {
   @PrimaryGeneratedColumn()
   public id: number
   
-  @ManyToOne(() => Site, s => s.installations)
+  @ManyToOne(() => Site, s => s.installations, {
+    onDelete: 'RESTRICT',
+    nullable: false
+  })
   public site: Site
 
-  @ManyToOne(() => Meter, m => m.installations)
+  @ManyToOne(() => Meter, m => m.installations, {
+    onDelete: 'RESTRICT',
+    nullable: true
+  })
   public meter: Meter
 
-  @ManyToOne(() => Method, m => m.installations)
+  @ManyToOne(() => Method, m => m.installations, {
+    onDelete: 'RESTRICT',
+    nullable: true
+  })
   public method: Method
 
   @Column('datetime', { 

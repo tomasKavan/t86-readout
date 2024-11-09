@@ -3,7 +3,6 @@ import {
   PrimaryColumn, 
   Column, 
   OneToMany, 
-  ManyToOne, 
   CreateDateColumn, 
   UpdateDateColumn 
 } from "typeorm";
@@ -27,7 +26,7 @@ export class Site {
   @OneToMany(() => SiteCharacteristic, sc => sc.site)
   public characteristics: SiteCharacteristic[]
 
-  @ManyToOne(() => SiteMeterInstallation, smi => smi.site)
+  @OneToMany(() => SiteMeterInstallation, smi => smi.site)
   public installations: SiteMeterInstallation[]
 
   @CreateDateColumn({

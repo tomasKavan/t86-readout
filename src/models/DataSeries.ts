@@ -25,7 +25,10 @@ export class DataSeries {
   @PrimaryGeneratedColumn()
   public id: number
 
-  @ManyToOne(() => SiteCharacteristic)
+  @ManyToOne(() => SiteCharacteristic, sc => sc.dataSeries, {
+    onDelete: 'RESTRICT',
+    nullable: false
+  })
   public siteCharacteristic: SiteCharacteristic
 
   @Column('varchar')
@@ -42,6 +45,9 @@ export class DataSeries {
 
   @Column('datetime', { precision: 0 })
   public processedUntilUTCTime: Date
+
+  @Column('boolean', { default: () => true })
+  public processingEnabled: boolean
 
   @Column('datetime', { 
     precision: 0, 

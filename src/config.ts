@@ -27,7 +27,7 @@ const config: Config = {
     port: parseInt(process.env.DB_PORT) || 3363,
     user: process.env.DB_USER || 'readout',
     pass: process.env.DB_PASS || 'oh.G.read.4',
-    name: process.env.DB_NAME || 'readout',
+    name: process.env.DB_NAME || 'readout2',
     logging: processLoggerOptions(process.env.DB_LOGLEVEL)
   },
   api: {

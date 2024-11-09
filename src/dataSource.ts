@@ -1,16 +1,5 @@
 import { DataSource } from 'typeorm'
-import { 
-  Medium, 
-  ConsumptionPlace, 
-  ConsumptionQhourly,
-  ConsumptionHourly,
-  ConsumptionDaily,
-  ConsumptionMonthly,
-  Meter,
-  MeterInstallation,
-  MeterReadoutLog,
-  MeterType
-} from './models/index'
+import { modelsArray } from './models/index'
 
 export default function initDataSource (config) {
   return new DataSource({
@@ -20,18 +9,7 @@ export default function initDataSource (config) {
     username: config.user,
     password: config.pass,
     database: config.name,
-    entities: [
-      Medium, 
-      ConsumptionPlace, 
-      ConsumptionQhourly, 
-      ConsumptionHourly,
-      ConsumptionDaily,
-      ConsumptionMonthly,
-      Meter, 
-      MeterInstallation, 
-      MeterReadoutLog, 
-      MeterType
-    ],
+    entities: modelsArray,
     synchronize: true,
     logging: config.logging,
     

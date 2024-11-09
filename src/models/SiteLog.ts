@@ -19,7 +19,10 @@ export class SiteLog {
   @PrimaryGeneratedColumn()
   public readonly id: number
 
-  @ManyToOne(() => SiteCharacteristic, sc => sc.log)
+  @ManyToOne(() => SiteCharacteristic, sc => sc.log, {
+    onDelete: 'RESTRICT',
+    nullable: false
+  })
   public characteristic: SiteCharacteristic
 
   @Column('datetime', { precision: 0 })
@@ -31,7 +34,7 @@ export class SiteLog {
   })
   public status: EntryStatus
 
-  @Column('varchar', { length: 255, nullable: true })
+  @Column('varchar', { nullable: true })
   public error: string
 
   @Column('datetime', { precision: 0, nullable: true })

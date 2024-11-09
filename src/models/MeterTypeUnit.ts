@@ -30,7 +30,10 @@ export class MeterTypeUnit {
   @Column('int', { default: () => 0 })
   public rescaleOrder: number
 
-  @ManyToOne(() => MeterType, mt => mt.units)
+  @ManyToOne(() => MeterType, mt => mt.units, {
+    eager: true,
+    onDelete: 'RESTRICT'
+  })
   public meterType: MeterType
 
   @OneToMany(() => SiteMeterInstallationMap, smim => smim.meterTypeUnit)

@@ -19,6 +19,9 @@ export class MethodMBus extends Method {
   @Column('int')
   public baseReadoutFrequencyMinutes: number
 
+  @Column('boolean', { default: () => true })
+  public enabled: boolean
+
   @OneToMany(() => SiteMeterInstallationMBus, smi => smi.method)
   public installations: SiteMeterInstallationMBus[]
 }
