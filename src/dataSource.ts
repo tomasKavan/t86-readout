@@ -1,5 +1,5 @@
 import { DataSource } from 'typeorm'
-import { modelsArray } from './models/index'
+import { modelsArray, subscribersArray } from './models/index'
 
 export default function initDataSource (config) {
   return new DataSource({
@@ -10,6 +10,7 @@ export default function initDataSource (config) {
     password: config.pass,
     database: config.name,
     entities: modelsArray,
+    subscribers: subscribersArray,
     synchronize: true,
     logging: config.logging,
     

@@ -62,16 +62,16 @@ export class DataSeries {
   public notes: string
 
   @OneToMany(() => DataSeriesQhourly, dsqh => dsqh.dataSeries)
-  public qhourly: DataSeriesQhourly[]
+  public qhourly: Promise<DataSeriesQhourly[]>
 
   @OneToMany(() => DataSeriesHourly, dsh => dsh.dataSeries)
-  public hourly: DataSeriesHourly[]
+  public hourly: Promise<DataSeriesHourly[]>
 
   @OneToMany(() => DataSeriesDaily, dsd => dsd.dataSeries)
-  public daily: DataSeriesDaily[]
+  public daily: Promise<DataSeriesDaily[]>
 
   @OneToMany(() => DataSeriesMonthly, dsm => dsm.dataSeries)
-  public monthly: DataSeriesMonthly[]
+  public monthly: Promise<DataSeriesMonthly[]>
 
   @CreateDateColumn({
     type: 'datetime',

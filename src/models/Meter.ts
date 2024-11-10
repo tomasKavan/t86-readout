@@ -31,7 +31,7 @@ export class Meter {
   public notes: string
 
   @OneToMany(() => SiteMeterInstallation, smi => smi.meter)
-  public installations: SiteMeterInstallation[]
+  public installations: Promise<SiteMeterInstallation[]>
 
   @CreateDateColumn({
     type: 'datetime',

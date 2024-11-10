@@ -14,7 +14,9 @@ const api = express()
 api.use('/api', apiRouter)
 
 appDataSource.initialize()
-.then(() => {
+.then(async () => {
+  // Set Timezone to UTC - All dates in DB are stored as UTC!!!
+  await appDataSource.manager.query('SET @@session.time_zone = \'+00:00\';')
   console.log(`[DataSource] initialized`)
 
   // Run API HTTP server

@@ -16,6 +16,8 @@ import { SiteMeterInstallation } from './SiteMeterInstallation'
 import { SiteMeterInstallationMBus } from './SiteMeterInstallationMbus'
 import { SiteMeterInstallationMap } from './SiteMeterInstallationMap'
 
+import { SiteMeterInstallationTriggers } from './SiteMeterInstallation'
+
 const modelsArray = [
   DataSeries, 
   DataSeriesQhourly,
@@ -35,7 +37,12 @@ const modelsArray = [
   SiteMeterInstallationMap
 ]
 
+const subscribersArray = [
+  SiteMeterInstallationTriggers
+]
+
 export {
+  subscribersArray,
   modelsArray,
   DataSeries, 
   DataSeriesQhourly,

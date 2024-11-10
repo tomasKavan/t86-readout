@@ -23,5 +23,5 @@ export class MethodMBus extends Method {
   public enabled: boolean
 
   @OneToMany(() => SiteMeterInstallationMBus, smi => smi.method)
-  public installations: SiteMeterInstallationMBus[]
+  public installations: Promise<SiteMeterInstallationMBus[]>
 }

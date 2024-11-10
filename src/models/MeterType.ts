@@ -21,7 +21,7 @@ export class MeterType {
   public model: string
 
   @OneToMany(() => Meter, (m) => m.type)
-  public meters: Meter[]
+  public meters: Promise<Meter[]>
 
   @OneToMany(() => MeterTypeUnit, mtu => mtu.meterType)
   public units: MeterTypeUnit[]

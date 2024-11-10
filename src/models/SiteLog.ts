@@ -6,8 +6,9 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn
-} from "typeorm";
-import { SiteCharacteristic } from "./SiteCharacteristic";
+} from "typeorm"
+import { SiteCharacteristic } from "./SiteCharacteristic"
+import { SiteMeterInstallation } from "./SiteMeterInstallation"
 
 export enum EntryStatus {
   OK = 'ok',
@@ -24,6 +25,15 @@ export class SiteLog {
     nullable: false
   })
   public characteristic: SiteCharacteristic
+
+  @ManyToOne(() => SiteMeterInstallation, smi => smi.log, {
+    onDelete: 'SET NULL',
+    nullable: true
+  })
+  public siteMeterInstallation: SiteMeterInstallation
+
+  @Column('boolean', { default: () => true })
+  public valid: boolean
 
   @Column('datetime', { precision: 0 })
   public logUTCTime: Date

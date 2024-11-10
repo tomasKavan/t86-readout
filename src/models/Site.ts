@@ -27,7 +27,7 @@ export class Site {
   public characteristics: SiteCharacteristic[]
 
   @OneToMany(() => SiteMeterInstallation, smi => smi.site)
-  public installations: SiteMeterInstallation[]
+  public installations: Promise<SiteMeterInstallation[]>
 
   @CreateDateColumn({
     type: 'datetime',

@@ -16,7 +16,7 @@ export class Method {
   public id: string
 
   @OneToMany(() => SiteMeterInstallation, smi => smi.method)
-  public installations: SiteMeterInstallation[]
+  public installations: Promise<SiteMeterInstallation[]>
 
   @Column('text')
   public description: string
