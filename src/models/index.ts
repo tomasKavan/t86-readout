@@ -9,11 +9,13 @@ import { Meter } from './Meter'
 import { MeterType } from './MeterType'
 import { MeterTypeUnit } from './MeterTypeUnit'
 import { MeterTypeUnitMbus } from './MeterTypeUnitMbus'
-import { Method } from './Method'
-import { MethodMBus } from './MethodMbus'
+import { ReadMethod } from './ReadMethod'
+import { ReadMethodMBus } from './ReadMethodMbus'
+import { ReadMethodApi } from './ReadMethodApi'
 import { Site } from './Site'
 import { SiteMeterInstallation } from './SiteMeterInstallation'
 import { SiteMeterInstallationMBus } from './SiteMeterInstallationMbus'
+import { SiteMeterInstallationApi } from './SiteMeterInstallationApi'
 import { SiteMeterInstallationMap } from './SiteMeterInstallationMap'
 
 import { SiteMeterInstallationTriggers } from './SiteMeterInstallation'
@@ -29,11 +31,13 @@ const modelsArray = [
   MeterType,
   MeterTypeUnit,
   MeterTypeUnitMbus,
-  Method,
-  MethodMBus,
+  ReadMethod,
+  ReadMethodMBus,
+  ReadMethodApi,
   Site,
   SiteMeterInstallation,
   SiteMeterInstallationMBus,
+  SiteMeterInstallationApi,
   SiteMeterInstallationMap
 ]
 
@@ -54,10 +58,12 @@ export {
   MeterType,
   MeterTypeUnit,
   MeterTypeUnitMbus,
-  Method,
-  MethodMBus,
+  ReadMethod,
+  ReadMethodMBus,
+  ReadMethodApi,
   Site,
   SiteMeterInstallation,
   SiteMeterInstallationMBus,
+  SiteMeterInstallationApi,
   SiteMeterInstallationMap
 }

@@ -2,6 +2,22 @@ import { Brackets, DataSource } from "typeorm";
 import { ConsumptionPlace, Meter, MeterInstallation, MeterReadoutLog, MeterType } from "../models";
 import { MbusReadout, ReadoutOutput } from "./MbusReadout";
 import { ReadoutLogEntryStatus } from "../models/MeterReadoutLog";
+import { CronScheduler } from "../CronScheduler";
+
+let scheduler!: CronScheduler
+
+async function scheduleTick(ds: DataSource) {
+
+}
+
+async function schedule(ds) {
+  scheduler = new CronScheduler(async () => {
+    await scheduleTick(ds)
+  })
+}
+
+
+
 
 function installationOnPrimaryAddress(places: ConsumptionPlace[], primary: number): MeterInstallation | null {
   const cp = places.find(cp => cp.mbusPrimary === primary)

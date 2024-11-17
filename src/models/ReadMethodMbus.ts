@@ -1,9 +1,9 @@
 import { ChildEntity, Column, OneToMany } from "typeorm"
-import { Method } from "./Method"
 import { SiteMeterInstallationMBus } from "./SiteMeterInstallationMbus"
+import { ReadMethodScheduled } from "./ReadMethodScheduled"
 
 @ChildEntity()
-export class MethodMBus extends Method {
+export class ReadMethodMBus extends ReadMethodScheduled {
   @Column('varchar')
   public host: string
 
@@ -19,9 +19,6 @@ export class MethodMBus extends Method {
   @Column('int')
   public baseReadoutFrequencyMinutes: number
 
-  @Column('boolean', { default: () => true })
-  public enabled: boolean
-
-  @OneToMany(() => SiteMeterInstallationMBus, smi => smi.method)
+  @OneToMany(() => SiteMeterInstallationMBus, smi => smi.readMethod)
   public installations: Promise<SiteMeterInstallationMBus[]>
 }

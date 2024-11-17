@@ -6,6 +6,8 @@
     "tsc-watch": "^6.2.0"
   },
   "dependencies": {
+    "cron-parser": "^4.9.0",
+    "cron-validator": "^1.3.1",
     "express": "^4.19.2",
     "mysql2": "^3.10.3",
     "node-mbus": "^2.2.4",

@@ -11,15 +11,18 @@ import {
 
 @Entity()
 @TableInheritance({ column: { type: 'varchar', name: 'type' }})
-export class Method {
+export class ReadMethod {
   @PrimaryColumn('varchar', { length: 16 })
   public id: string
 
-  @OneToMany(() => SiteMeterInstallation, smi => smi.method)
+  @OneToMany(() => SiteMeterInstallation, smi => smi.readMethod)
   public installations: Promise<SiteMeterInstallation[]>
 
   @Column('text')
   public description: string
+
+  @Column('boolean', { default: () => true })
+  public enabled: boolean
 
   @CreateDateColumn({
     type: 'datetime',

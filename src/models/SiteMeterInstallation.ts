@@ -7,19 +7,16 @@ import {
   UpdateDateColumn, 
   TableInheritance,
   OneToMany,
-  BeforeInsert,
-  getRepository,
   EventSubscriber,
   EntitySubscriberInterface,
   InsertEvent,
-  LessThan,
   MoreThanOrEqual,
   UpdateEvent,
   MoreThan
 } from "typeorm"
 import { Site } from "./Site"
 import { Meter } from "./Meter"
-import { Method } from "./Method"
+import { ReadMethod } from "./ReadMethod"
 import { SiteLog } from "./SiteLog"
 import { SiteMeterInstallationMap } from "./SiteMeterInstallationMap"
 
@@ -41,11 +38,11 @@ export class SiteMeterInstallation {
   })
   public meter: Meter
 
-  @ManyToOne(() => Method, m => m.installations, {
+  @ManyToOne(() => ReadMethod, m => m.installations, {
     onDelete: 'RESTRICT',
     nullable: true
   })
-  public method: Method
+  public readMethod: ReadMethod
 
   @Column('datetime', { 
     precision: 0, 
