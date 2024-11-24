@@ -27,6 +27,9 @@ export class Meter {
   @Column('varchar')
   public serialNumber: string
 
+  @Column('bigint', { nullable: true, default: null })
+  public mbusSecondary: number
+
   @Column('text')
   public notes: string
 

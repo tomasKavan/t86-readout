@@ -1,6 +1,7 @@
-import { ChildEntity, Column, ManyToOne } from "typeorm";
-import { SiteMeterInstallation } from "./SiteMeterInstallation";
-import { ReadMethodMBus } from "./ReadMethodMbus";
+import { ChildEntity, Column, ManyToOne, OneToMany } from "typeorm"
+import { SiteMeterInstallation } from "./SiteMeterInstallation"
+import { ReadMethodMBus } from "./ReadMethodMbus"
+import { InstallationMapMbus } from "./InstallationMapMbus"
 
 @ChildEntity()
 export class SiteMeterInstallationMBus extends SiteMeterInstallation {
@@ -16,4 +17,6 @@ export class SiteMeterInstallationMBus extends SiteMeterInstallation {
   @Column('int', { default: () => 1 })
   public baseReadoutFrequencyDivider: number
 
+  @OneToMany(() => InstallationMapMbus, smim => smim.installation)
+  public map: InstallationMapMbus[]
 }

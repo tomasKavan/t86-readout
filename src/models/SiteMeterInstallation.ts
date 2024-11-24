@@ -18,7 +18,7 @@ import { Site } from "./Site"
 import { Meter } from "./Meter"
 import { ReadMethod } from "./ReadMethod"
 import { SiteLog } from "./SiteLog"
-import { SiteMeterInstallationMap } from "./SiteMeterInstallationMap"
+import { InstallationMap } from "./InstallationMap"
 
 @Entity()
 @TableInheritance({ column : { type: 'varchar', name: 'methodType'}})
@@ -59,8 +59,8 @@ export class SiteMeterInstallation {
   @OneToMany(() => SiteLog, sl => sl.siteMeterInstallation)
   public log: Promise<SiteLog[]>
 
-  @OneToMany(() => SiteMeterInstallationMap, smim => smim.installation)
-  public map: SiteMeterInstallationMap[]
+  @OneToMany(() => InstallationMap, smim => smim.installation)
+  public map: InstallationMap[]
 
   @CreateDateColumn({
     type: 'datetime',

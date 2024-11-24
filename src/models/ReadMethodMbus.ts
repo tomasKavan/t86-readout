@@ -16,9 +16,6 @@ export class ReadMethodMBus extends ReadMethodScheduled {
   @Column('boolean')
   public autoConnect: boolean
 
-  @Column('int')
-  public baseReadoutFrequencyMinutes: number
-
   @OneToMany(() => SiteMeterInstallationMBus, smi => smi.readMethod)
   public installations: Promise<SiteMeterInstallationMBus[]>
 }

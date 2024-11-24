@@ -1,24 +1,17 @@
-import { LoggerOptions, LogLevel } from "typeorm"
+import { LoggerOptions } from "typeorm"
+import { DataSourceConfigOptions } from "./dataSource"
+import { ReadoutSchedulerOptions } from "./readout"
+import { DataSeriesConfigOptions } from "./dataSerie"
 
 interface Config {
-  db: {
-    host: string,
-    port: number,
-    user: string,
-    pass: string,
-    name: string,
-    logging: LoggerOptions
-  },
+  db: DataSourceConfigOptions,
   api: {
     port: number,
     user: string,
     secret: string
   },
-  schedule: {
-    readoutMinute: number,
-    consumptionMinute: number,
-    onStart: boolean
-  }
+  schedule: ReadoutSchedulerOptions,
+  dataSeries: DataSeriesConfigOptions
 }
 
 const config: Config = {
@@ -36,9 +29,12 @@ const config: Config = {
     secret: '65did!U!read?!65'
   },
   schedule: {
-    readoutMinute: parseInt(process.env.SCHEDULE_READOUT_MINUTE) || 10,
-    consumptionMinute: parseInt(process.env.SCHEDULE_CONSUMPTION_MINUTE) || 1,
+    refreshScheduleEachMs: parseInt(process.env.REFRESH_SCHEDULE_EACH_MS) || 1000,
     onStart: booleanFromEnv(process.env.SCHEDULE_ONSTART) || false
+  },
+  dataSeries: {
+    processOnMinute: parseInt(process.env.DATASERIES_PROCESS_ON_MINUTE) || 5,
+    onStart: booleanFromEnv(process.env.DATASERIES_ONSTART) || false
   }
 }
 

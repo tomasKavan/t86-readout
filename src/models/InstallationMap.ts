@@ -1,10 +1,11 @@
-import { Entity, Column, ManyToOne, CreateDateColumn, UpdateDateColumn } from "typeorm"
+import { Entity, ManyToOne, CreateDateColumn, UpdateDateColumn, TableInheritance } from "typeorm"
 import { SiteCharacteristic } from "./SiteCharacteristic"
 import { MeterTypeUnit } from "./MeterTypeUnit"
 import { SiteMeterInstallation } from "./SiteMeterInstallation"
 
 @Entity()
-export class SiteMeterInstallationMap {
+@TableInheritance({ column: { type: 'varchar', name: 'mapType' }})
+export class InstallationMap {
   @ManyToOne(() => SiteCharacteristic, sc => sc.map, {
     onDelete: 'CASCADE',
     nullable: false

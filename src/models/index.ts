@@ -16,7 +16,7 @@ import { Site } from './Site'
 import { SiteMeterInstallation } from './SiteMeterInstallation'
 import { SiteMeterInstallationMBus } from './SiteMeterInstallationMbus'
 import { SiteMeterInstallationApi } from './SiteMeterInstallationApi'
-import { SiteMeterInstallationMap } from './SiteMeterInstallationMap'
+import { SiteMeterInstallationMap } from './InstallationMap'
 
 import { SiteMeterInstallationTriggers } from './SiteMeterInstallation'
 

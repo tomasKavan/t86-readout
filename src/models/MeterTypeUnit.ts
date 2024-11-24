@@ -10,7 +10,7 @@ import {
 } from "typeorm"
 import { Function, Unit } from "./SiteCharacteristic"
 import { MeterType } from "./MeterType"
-import { SiteMeterInstallationMap } from "./SiteMeterInstallationMap"
+import { InstallationMap } from "./InstallationMap"
 
 @Entity()
 @TableInheritance({ column: { type: 'varchar', name: 'methodType' }})
@@ -32,12 +32,13 @@ export class MeterTypeUnit {
 
   @ManyToOne(() => MeterType, mt => mt.units, {
     eager: true,
-    onDelete: 'RESTRICT'
+    onDelete: 'RESTRICT',
+    nullable: false
   })
   public meterType: MeterType
 
-  @OneToMany(() => SiteMeterInstallationMap, smim => smim.meterTypeUnit)
-  public installationMap: SiteMeterInstallationMap
+  @OneToMany(() => InstallationMap, smim => smim.meterTypeUnit)
+  public installationMap: InstallationMap
 
   @CreateDateColumn({
     type: 'datetime',

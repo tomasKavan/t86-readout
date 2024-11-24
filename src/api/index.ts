@@ -10,7 +10,7 @@ export default function (dataSource, config) {
 
   router.use(auth)
 
-  router.use('/consumption', consumption(dataSource, config))
+  router.use('/data-serie', consumption(dataSource, config))
   router.use('/meter', meter(dataSource, config))
   router.use('/meter-type', meterType(dataSource, config))
   router.use('/medium', medium(dataSource, config))

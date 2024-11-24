@@ -8,7 +8,7 @@ import {
   OneToMany
 } from "typeorm"
 import { Site } from "./Site"
-import { SiteMeterInstallationMap } from "./SiteMeterInstallationMap"
+import { InstallationMap } from "./InstallationMap"
 import { SiteLog } from "./SiteLog"
 import { DataSeries } from "./DataSeries"
 
@@ -88,14 +88,14 @@ export class SiteCharacteristic {
   @Column('varchar')
   public description: string
 
-  @OneToMany(() => SiteMeterInstallationMap, smim => smim.siteCharacteristic)
-  public map: SiteMeterInstallationMap[]
+  @OneToMany(() => InstallationMap, smim => smim.siteCharacteristic)
+  public map: Promise<InstallationMap[]>
 
   @OneToMany(() => SiteLog, sl => sl.characteristic)
-  public log: SiteLog[]
+  public log: Promise<SiteLog[]>
 
   @OneToMany(() => DataSeries, ds => ds.siteCharacteristic)
-  public dataSeries: DataSeries[]
+  public dataSeries: Promise<DataSeries[]>
 
   @CreateDateColumn({
     type: 'datetime',

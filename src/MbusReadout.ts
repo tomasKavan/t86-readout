@@ -8,26 +8,32 @@ enum State {
   Disconnecting = 'disconnecting'
 }
 
-export type ReadoutInput = {
-  primaryAddress: number, 
-  serial: number,
-  recordId?: number, 
+export type ReadSlaveRecordQuery = {
+  recordId: number,
   rescaleOrder?: number
 }
-export type ReadoutValue = {
-  recordId: number,
-  function: string,
-  unit?: string,
-  value: number,
-  originalValue: number
-  timestamp: Date
+
+export type ReadSlaveQuery = {
+  primaryAddress: number, 
+  serial: number,
+  records: ReadSlaveRecordQuery[]
 }
-export type ReadoutOutput = {
-  input: ReadoutInput,
-  data?: ReadoutValue,
+
+export type ReadSlaveRecordData = {
+  recordId: number,
+  function?: string,
+  unit?: string,
+  value?: number,
+  originalValue?: number
+  timestamp?: Date,
   error?: Error
 }
-export type ByOneCallback = (output: ReadoutOutput) => Promise<void>
+
+export type ReadSlaveResponse = {
+  query: ReadSlaveQuery,
+  data: ReadSlaveRecordData[],
+  error?: Error
+}
 
 export class MbusReadout {
 
@@ -84,70 +90,52 @@ export class MbusReadout {
     })
   }
 
-  public async readInputs(list: Array<ReadoutInput | number>, byOneClb?: ByOneCallback, clbBlocks?: boolean ): Promise<ReadoutOutput[]> {
-    const dataList: ReadoutOutput[] = []
+  public async readInputs(list: Array<ReadSlaveQuery> ): Promise<ReadSlaveResponse[]> {
+    const dataList: ReadSlaveResponse[] = []
 
-    for (let i = 0; i < list.length; i++) {
-      const inpRec : ReadoutInput = typeof list[i] === 'number' ? {
-        primaryAddress: list[i] as number
-      } as ReadoutInput : list[i] as ReadoutInput
-      if (!inpRec.recordId) {
-        inpRec.recordId = 0
+    for (const q of list) {
+      const outAddr: ReadSlaveResponse = {
+        query: q,
+        data: new Array<ReadSlaveRecordData>()
       }
-      if (!inpRec.rescaleOrder) {
-        inpRec.rescaleOrder = 0
-      }
+      dataList.push(outAddr)
 
       try {
-        const rawData = await this.readAddress(inpRec.primaryAddress)
+        const rawData = await this.readAddress(q.primaryAddress)
+
         // Check serial number
-        if (rawData.SlaveInformation.Id !== inpRec.serial) {
-          throw new Error(`[MBusReader] Primary ${inpRec.primaryAddress}: Meter S/N ${rawData.SlaveInformation.Id} doesn't match S/N ${inpRec.serial} in DB`)
+        if (rawData.SlaveInformation.Id !== q.serial) {
+          throw new Error(`[MBusReader] Primary ${q.primaryAddress}: Meter S/N ${rawData.SlaveInformation.Id} doesn't match S/N ${q.serial} in DB`)
         }
-        // get record
-        const rec = rawData.DataRecord.find(item => {
-          return item.id === inpRec.recordId || 0
-        })
-        if (!rec) {
-          throw new Error(`[MBusReader] Primary ${inpRec.primaryAddress}: Record id ${inpRec.recordId} not found on readout`)
-        }
-        
-        const value = rec.Value as number * Math.pow(10, (inpRec.rescaleOrder || 0))
-        const outRec = {
-          recordId: rec.id as number,
-          function: rec.Function as string,
-          unit: rec.Unit as string,
-          value: value,
-          originalValue: rec.Value as number,
-          timestamp: new Date(rec.Timestamp)
-        }
-        try {
-          const out = {
-            input: inpRec,
-            data: outRec
-          }
-          dataList.push(out)
-          if (clbBlocks) {
-            await byOneClb?.(out)
+
+        // Get records
+        for (const qRec of q.records) {
+          const rec = rawData.DataRecord.find(item => {
+            return item.id === qRec.recordId
+          })
+          if (!rec) {
+            outAddr.data.push({
+              recordId: qRec.recordId,
+              error: new Error(`[MBusReader] Primary ${q.primaryAddress}: Record id ${qRec.recordId} not found on readout`)
+            })
           } else {
-            byOneClb?.(out)
+            const value = rec.Value as number * Math.pow(10, (qRec.rescaleOrder || 0))
+            const outRec: ReadSlaveRecordData = {
+              recordId: rec.id as number,
+              function: rec.Function as string,
+              unit: rec.Unit as string,
+              value: value,
+              originalValue: rec.Value as number,
+              timestamp: new Date(rec.Timestamp)
+            }
+            outAddr.data.push(outRec)
           }
-        } catch (e) {
-          console.log(`[MBusReader] Primary ${inpRec.primaryAddress}: Callback function throws (${e}). This shouldn't hapen. Please fix your code.`)
         }
       } catch (e) {
-        const out = {
-          input: inpRec,
-          error: e
-        }
-        dataList.push(out)
-        if (clbBlocks) {
-          await byOneClb?.(out)
-        } else {
-          byOneClb?.(out)
-        }
+        outAddr.error = new Error(`[MBusReadout] Error when reading/processing slave data. ${e}`)
       }
     }
+
     return dataList
   }
 

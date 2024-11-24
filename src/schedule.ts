@@ -1,4 +1,4 @@
-import { readout } from './readout/readout'
+import { readout } from './readout'
 import { consumption } from './consumption/consumption'
 
 const MIN_MS = 1000 * 60

@@ -4,11 +4,11 @@ import express from 'express'
 import config from './config'
 import ApiRouter from './api/index'
 import DataSource from './dataSource'
-import { schedule as readoutSchedule } from './readout'
+import ReadoutScheduler from './readout'
 
 const appDataSource = DataSource(config.db)
 const apiRouter = ApiRouter(appDataSource, config.api)
-
+const readoutScheduler = ReadoutScheduler(appDataSource, config.schedule)
 
 const api = express()
 api.use('/api', apiRouter)
@@ -25,8 +25,8 @@ appDataSource.initialize()
   })
 
   // Run readout scheduler
-  await readoutSchedule(appDataSource)
-  console.log(`[index:Readout] Scheduling finished`)
+  readoutScheduler.enable()
+  console.log(`[index:Readout] Scheduling enabled`)
 
   // Run Data Series processing scheduler
   await DataSeries.schedule(appDataSource)
