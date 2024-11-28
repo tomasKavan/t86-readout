@@ -98,6 +98,8 @@ export class CronScheduler<ParamsType> {
     } catch (e) {
       console.log(`[CRON Scheduler] Unable to refresh schedule. Error: ${e}`)
     }
+
+    this._refreshingSchedulePromise = null
   }
 
   async refreshSchedule() {
@@ -127,7 +129,7 @@ export class CronScheduler<ParamsType> {
           console.log(`[CRON Scheduler] SKIPPED Task <${task.id}>. Already running.`)
           continue;
         }
-        
+
         task.isRunning = true
 
         // Run

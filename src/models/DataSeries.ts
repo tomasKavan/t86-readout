@@ -34,8 +34,10 @@ export class DataSeries {
   @Column('varchar')
   public name: string
 
-  @Column(() => GeoLocation)
-  public timezoneLocation: GeoLocation
+  @Column('varchar', {
+    length: 32
+  })
+  public timezone: string
 
   @Column('enum', { 
     enum: ProcessingMethod, 
@@ -44,7 +46,10 @@ export class DataSeries {
   public processingMethod: ProcessingMethod
 
   @Column('datetime', { precision: 0 })
-  public processedUntilUTCTime: Date
+  public lastProcessedUTCQhour: Date
+
+  @Column('datetime', { precision: 0 })
+  public updatesProcessedUntilUTCTime: Date
 
   @Column('boolean', { default: () => true })
   public processingEnabled: boolean
@@ -55,7 +60,10 @@ export class DataSeries {
   })
   public startUTCTime: Date
   
-  @Column('datetime', { precision: 0, nullable: true })
+  @Column('datetime', { 
+    precision: 0, 
+    nullable: true 
+  })
   public endUTCTime: Date
 
   @Column('text')

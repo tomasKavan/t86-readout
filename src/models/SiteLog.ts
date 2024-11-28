@@ -53,17 +53,9 @@ export class SiteLog {
   @Column('bigint', {default: 0})
   public value: number
 
-  @CreateDateColumn({
-    type: 'datetime',
-    precision: 0,
-    default: () => 'CURRENT_TIMESTAMP(0)'
-  })
-  createdUTCTime: Date
-
   @UpdateDateColumn({
     type: 'datetime',
     precision: 0,
-    default: () => 'CURRENT_TIMESTAMP(0)',
     onUpdate: 'CURRENT_TIMESTAMP(0)'
   })
   updatedUTCTime: Date

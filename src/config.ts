@@ -1,7 +1,7 @@
 import { LoggerOptions } from "typeorm"
 import { DataSourceConfigOptions } from "./dataSource"
 import { ReadoutSchedulerOptions } from "./readout"
-import { DataSeriesConfigOptions } from "./dataSerie"
+import { DataSeriesConfigOptions } from "./dataSeries"
 
 interface Config {
   db: DataSourceConfigOptions,
@@ -33,8 +33,9 @@ const config: Config = {
     onStart: booleanFromEnv(process.env.SCHEDULE_ONSTART) || false
   },
   dataSeries: {
-    processOnMinute: parseInt(process.env.DATASERIES_PROCESS_ON_MINUTE) || 5,
-    onStart: booleanFromEnv(process.env.DATASERIES_ONSTART) || false
+    processOnMinute: Math.max(0, Math.min(14, parseInt(process.env.DATASERIES_PROCESS_ON_MINUTE) || 5)),
+    onStart: booleanFromEnv(process.env.DATASERIES_ONSTART) || false,
+    skipQHoursFromNow: Math.max(1, parseInt(process.env.DATASERIES_SKIP_QHOURS_FROMNOW) || 1)
   }
 }
 

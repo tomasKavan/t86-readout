@@ -89,7 +89,8 @@ export default function ReadoutScheduler(dataSource: DataSource, config: Readout
             logRec.characteristic = map.siteCharacteristic
             logRec.siteMeterInstallation = inst
             logRec.valid = true
-            logRec.logUTCTime = now,
+            logRec.logUTCTime = now
+            logRec.updatedUTCTime = now
             logRec.status = record.error ? EntryStatus.ERROR : EntryStatus.OK
             if (logRec.status === EntryStatus.OK) {
               logRec.meterUTCTimestamp = record.timestamp
