@@ -1,7 +1,8 @@
 import { DataSource, EntityManager } from "typeorm"
-import { CronScheduler, CronSchedulerTask } from "./CronScheduler"
-import { DataSeries, DataSeriesDaily, DataSeriesHourly, DataSeriesMonthly, DataSeriesQhourly, SiteMeterInstallation } from "./models"
+import { DataSeries, DataSeriesDaily, DataSeriesHourly, DataSeriesMonthly, DataSeriesQhourly, Site, SiteMeterInstallation } from "./models"
 import { SiteLog } from "./models/SiteLog"
+import { DataSeriesEntryStatic, DataSeriesEntry } from "./models/DataSeriesEntry"
+import { SiteCharacteristic } from "./models/SiteCharacteristic"
 
 export type DataSeriesConfigOptions = {
   processOnMinute: number,
@@ -54,110 +55,35 @@ export default function DataSeriesScheduler(dataSource: DataSource, config: Data
   }
 
   async function _callProcessDataSeries() {
-    // List all Data series (where processingEnabled == true & in interval (startUTCTime, endUTCTime))
-    // For each data serie
-    // - Select odlest log.logUTCTime from logs with log.updatedUTCTime > processedUntilUTCTime
-    // - Round (floor) it to the quarter hours 
-    // - Delete all processed data in serie newer than it and set it to processedUntilUTCTime
-    // - Make a queue of qhours to process from processedUntilUTCTime to now - 15 * config.skipQHoursFromNow
-    //   Order it chronologicaly from the oldest
-
-    // For each qhour to process
-    // - Find all relevant installations
-    // - Load all logs in the qhour + 1 newest before
-    // - For each installation
-    //   - Substract value of the first log from the last log and add it to the qhour sum
-    // - If it's last qhour of a hour - process hour
-    // - If it's last qhour of a day - process day
-    // - If it's last qhour of a month - process month
-    // - In DB transaction insert all qhour, hour, day and month values and update processedUntilUTCTime
-
     const now = new Date()
-    const processUntilQhour = qhourShift(qhourBegin(now), -config.skipQHoursFromNow)
-    const processUntilQhourEnd = qhourShift(processUntilQhour, 1)
+    const qhourBeginNow = DataSeriesQhourly.getIntervalBegin(now, 'Z')
+    const processUntilQhour = DataSeriesQhourly.intervalShift(qhourBeginNow, -config.skipQHoursFromNow, 'Z')
     const mgr = dataSource.manager
 
+    // 1. List all enabled series 
     const series = await mgr.getRepository(DataSeries).createQueryBuilder('ds')
       .leftJoinAndSelect('ds.siteCharacteristic', 'sc')
       .leftJoinAndSelect('sc.site', 's')
       .where('ds.processingEnabled === TRUE')
       .getMany()
     
+    // 2. Iterate over series
     for (const serie of series) {
-      const log = await mgr.getRepository(SiteLog).createQueryBuilder('sl')
-        .where('sl.updatedUTCTime > :date AND sl.logUTCTime < :endDate', { 
-          date: serie.updatesProcessedUntilUTCTime,
-          endDate: serie.lastProcessedUTCQhour
-        })
-        .orderBy('sl.logUTCTime', 'ASC')
-        .limit(1)
-        .getOne()
-      
-      // We found log entry changed later than lastProcessedUTCQhour
-      // PUSH lastProcessedUTCQhour and delete all serie data until this time
-      // !! Be aware serie data are in local time. Once a year we must push 
-      //    processedUntilUTCTime even one hour further (DST -> STD)
-      if (log) {
-        serie.lastProcessedUTCQhour = qhourBegin(log.logUTCTime)
-
-        if (isInDSTtoSTDTransition(serie.lastProcessedUTCQhour, serie.timezone)) {
-          serie.lastProcessedUTCQhour = hoursShift(serie.lastProcessedUTCQhour, -1)
-        }
-
-        const beginOf = {
-          qhour: qhourBegin(serie.lastProcessedUTCQhour),
-          hour: hourBegin(serie.lastProcessedUTCQhour),
-          day: dayBegin(serie.lastProcessedUTCQhour),
-          month: monthBegin(serie.lastProcessedUTCQhour)
-        }
-
-        // do all in 1 transaction
+      // 2.1. Check if there is any log entry updated later than last processing of the site
+      // If yes, we must push processing of the site to this date and delete all newer processed entries
+      const restProcessedUntilUCTime = await findResetUTCTime(serie, mgr)
+      if (restProcessedUntilUCTime) {
         try {
           await mgr.transaction(async (trnMng) => {
-            // save new processedUntilUTCTime
+            const nrest = DataSeriesQhourly.normalizeDate(restProcessedUntilUCTime, serie.timezone)
+            serie.lastProcessedUTCQhour = nrest
             await trnMng.getRepository(DataSeries).save(serie)
 
-            
-
-            // delete all abundant qhours
-            await trnMng.getRepository(DataSeriesQhourly).createQueryBuilder()
-              .delete()
-              .from(DataSeriesQhourly)
-              .where('dataSeries = :dsId AND UTCTime >= :date', {
-                dsId: serie.id,
-                date: sqlTimeStringWithTimezone(beginOf.qhour, serie.timezone)
-              })
-              .execute()
-
-            // delete all abundant hours
-            await trnMng.getRepository(DataSeriesHourly).createQueryBuilder()
-              .delete()
-              .from(DataSeriesHourly)
-              .where('dataSeries = :dsId AND UTCTime >= :date', {
-                dsId: serie.id,
-                date: sqlTimeStringWithTimezone(beginOf.hour, serie.timezone)
-              })
-              .execute()
-
-            // delete all abundant days
-            await trnMng.getRepository(DataSeriesDaily).createQueryBuilder()
-              .delete()
-              .from(DataSeriesDaily)
-              .where('dataSeries = :dsId AND UTCTime >= :date', {
-                dsId: serie.id,
-                date: sqlTimeStringWithTimezone(beginOf.day, serie.timezone)
-              })
-              .execute()
-
-            // delete all abundant months
-            await trnMng.getRepository(DataSeriesMonthly).createQueryBuilder()
-              .delete()
-              .from(DataSeriesMonthly)
-              .where('dataSeries = :dsId AND UTCTime >= :date', {
-                dsId: serie.id,
-                date: sqlTimeStringWithTimezone(beginOf.month, serie.timezone)
-              })
-              .execute()
+            // Prune all irelvant (newer than serie.lastProcessedUTCQhour) entries
+            await pruneDataEntries(DataSeriesQhourly, serie, trnMng)
+            await pruneDataEntries(DataSeriesHourly, serie, trnMng)
+            await pruneDataEntries(DataSeriesDaily, serie, trnMng)
+            await pruneDataEntries(DataSeriesMonthly, serie, trnMng)
           })
         } catch (e) {
           console.log(`[DataSeries Processor]: Unable to process serie (${serie.id}). Due to error when pushing back processedUntilUTCTime. ${e}`)
@@ -165,94 +91,55 @@ export default function DataSeriesScheduler(dataSource: DataSource, config: Data
         }
       }
       
+      // 2.2. Iterate over qhour from serie.lastProcessedUTCQhour to processUntil and process each qhour
       let qhour = serie.lastProcessedUTCQhour
       while(qhour <= processUntilQhour) {
-        const qhourEnd = qhourShift(qhour, 1)
+        const qhourEnd = DataSeriesQhourly.intervalShift(qhour, 1, serie.timezone)
 
         await mgr.transaction(async (trn) => {
-          // Select all relevant installations
-          const installs = await trn.getRepository(SiteMeterInstallation)
-            .createQueryBuilder('smi')
-            .leftJoinAndSelect('smi.meter', 'm')
-            .leftJoinAndSelect('m.type', 'mt')
-            .leftJoinAndSelect('smi.map', 'map')
-            .leftJoinAndSelect('map.siteCharacteristic', 'sc')
-            .leftJoinAndSelect('map.meterTypeUnit', 'mtu')
-            .where('smi.site = :site', { site: serie.siteCharacteristic.site })
-            .andWhere('smi.installationUTCTime IS NULL OR smi.installationUTCTime <= :qhBeg', { gBeg: qhour })
-            .andWhere('smi.removalUTCTime IS NULL OR smi.removalUTCTime >= :qhEnd', { qEnd: qhourEnd })
-            .getMany()
-
+          // 2.2.1. Select all relevant installations
+          const st = serie.siteCharacteristic.site
+          const installs = await getInstallationsInRange(st, qhour, qhourEnd, trn)
+          
+          // 2.2.2. Process logs in the qhour
           // TODO - other processing methods than DIFFERENCE
           let value = 0
 
-          // Iterate over all relevant installations and add diferences to the overal value
+          // 2.2.2.1. Iterate over all relevant installations and add diferences to the overal value
           for (const inst of installs) {
-            const logsIn = await trn.getRepository(SiteLog)
-              .createQueryBuilder('sl')
-              .where('sl.siteMeterInstallation = :smi', { smi: inst })
-              .where('sl.characteristic = :c', { c: serie.siteCharacteristic })
-              .where('sl.logUTCTime >= :beg AND sl.logUTCTime < :end', { beg: qhour, end: qhourEnd})
-              .getMany()
-            const logOut = await trn.getRepository(SiteLog)
-              .createQueryBuilder('sl')
-              .where('sl.siteMeterInstallation = :smi', { smi: inst })
-              .where('sl.characteristic = :c', { c: serie.siteCharacteristic })
-              .where('sl.logUTCTime < :beg', { beg: qhour } )
-              .orderBy('sl.logUTCTime', 'DESC')
-              .limit(1)
-              .getOne()
+            const logs = await getLogsInRange(inst, serie.siteCharacteristic, qhour, qhourEnd, trn)
             
               // Not enough readouts to calculate consumption
-              if ((!logOut && logsIn.length < 2) || (logOut && logsIn.length < 1)) {
+              if ((!logs.out && logs.in.length < 2) || (logs.out && logs.in.length < 1)) {
                 continue
               }
 
               // Calculate consumption and add it to overal value
-              const firstLog = logOut || logsIn[0]
-              const lastLog = logsIn[logsIn.length - 1]
+              const firstLog = logs.out || logs.in[0]
+              const lastLog = logs.in[logs.in.length - 1]
               value += lastLog.value - firstLog.value
           }
 
-          // If overal value is not 0 save it
+          // 2.2.3. If overal value is not 0 save it
           if (value != 0) {
-            const input = await qhourEntryForUTCTime(serie, qhour, trn)
+            const qhourEnd = DataSeriesQhourly.getIntervalEnd(qhour, serie.timezone)
+            // If there is time shift (dayligt saving time)
+            const input = await DataSeriesQhourly.entryForInterval(serie, qhour, trn)
             input.value += value
             trn.getRepository(DataSeriesQhourly).save(input)
           }
 
-          await agregateValue<DataSeriesHourly>(serie, qhour, trn)
-          await agregateValue<DataSeriesDaily>(serie, qhour, trn)
-          await agregateValue<DataSeriesMonthly>(serie, qhour, trn)
+          // 2.2.4. Agregate values
+          await agregateValue(DataSeriesHourly, serie, qhour, trn)
+          await agregateValue(DataSeriesDaily, serie, qhour, trn)
+          await agregateValue(DataSeriesMonthly, serie, qhour, trn)
 
-          if (hourEndsAt(qhourEnd)) {
-            const hb = hourBegin(qhour)
-            const input = await hourEntryForUTCTime(serie, hb, trn)
-            input.value = await agregateValue(serie, hb, hoursShift(hb, 1), trn)
-            trn.getRepository(DataSeriesHourly).save(input)
-          }
-
-          if (dayEndsAt(qhourEnd)) {
-            const hb = dayBegin(qhour)
-            const input = await dayEntryForUTCTime(serie, hb, trn)
-            input.value = await agregateValue(serie, hb, dayShift(hb, 1), trn)
-            trn.getRepository(DataSeriesDaily).save(input)
-          }
-
-          if (monthEndsAt(qhourEnd)) {
-            const hb = monthBegin(qhour)
-            const input = await monthEntryForUTCTime(serie, hb, trn)
-            input.value = await agregateValue(serie, hb, monthShift(hb, 1), trn)
-            trn.getRepository(DataSeriesDaily).save(input)
-          }
-
-          // push lastProcessedUTCQhour forward
-          
+          // 2.2.5. push lastProcessedUTCQhour forward          
           serie.lastProcessedUTCQhour = qhour
           trn.getRepository(DataSeries).save(serie)
 
-          // move to the next qhour
-          qhour = qhourShift(qhour, 1)
+          // 2.2.6. move to the next qhour
+          qhour = qhourEnd
         })
       }
 
@@ -263,79 +150,108 @@ export default function DataSeriesScheduler(dataSource: DataSource, config: Data
     runningPromise = null
   }
 
-  async function agregateValue(serie: DataSeries, start: Date, end: Date, trn?: EntityManager): Promise<number> {
+  async function findResetUTCTime(serie: DataSeries, trn?: EntityManager): Promise<Date | null> {
     const mgr = trn || dataSource.manager
 
+    const log = await mgr.getRepository(SiteLog).createQueryBuilder('sl')
+      .where('sl.characteristic = :char', { char: serie.siteCharacteristic})
+      .where('sl.updatedUTCTime > :date AND sl.logUTCTime < :endDate', { 
+        date: serie.updatesProcessedUntilUTCTime,
+        endDate: serie.lastProcessedUTCQhour
+      })
+      .orderBy('sl.logUTCTime', 'ASC')
+      .limit(1)
+      .getOne()
+    if (!log) {
+      return null
+    }
+    return log.updatedUTCTime
+  }
+
+  async function getInstallationsInRange(site: Site, qhour: Date, qhourEnd: Date, trn?: EntityManager): Promise<SiteMeterInstallation[]> {
+    const mgr = trn || dataSource.manager
+
+    return await mgr.getRepository(SiteMeterInstallation)
+    .createQueryBuilder('smi')
+    .leftJoinAndSelect('smi.meter', 'm')
+    .leftJoinAndSelect('m.type', 'mt')
+    .leftJoinAndSelect('smi.map', 'map')
+    .leftJoinAndSelect('map.siteCharacteristic', 'sc')
+    .leftJoinAndSelect('map.meterTypeUnit', 'mtu')
+    .where('smi.site = :site', { site })
+    .andWhere('smi.installationUTCTime IS NULL OR smi.installationUTCTime <= :qhour', { qhour })
+    .andWhere('smi.removalUTCTime IS NULL OR smi.removalUTCTime >= :qhourEnd', { qhourEnd })
+    .getMany()
+  }
+
+  type SiteLogsInRange = {
+    in: SiteLog[],
+    out?: SiteLog
+  }
+  async function getLogsInRange(inst: SiteMeterInstallation, char: SiteCharacteristic, qhour: Date, qhourEnd: Date, trn?: EntityManager): Promise<SiteLogsInRange> {
+    const mgr = trn || dataSource.manager
+
+    return {
+      in: await mgr.getRepository(SiteLog)
+        .createQueryBuilder('sl')
+        .where('sl.siteMeterInstallation = :inst', { inst })
+        .where('sl.characteristic = :char', { char })
+        .where('sl.logUTCTime >= :qhour AND sl.logUTCTime < :qhourEnd', { qhour, qhourEnd })
+        .getMany(),
+      out: await trn.getRepository(SiteLog)
+        .createQueryBuilder('sl')
+        .where('sl.siteMeterInstallation = :inst', { inst })
+        .where('sl.characteristic = :char', { char })
+        .where('sl.logUTCTime < :qhour', { qhour } )
+        .orderBy('sl.logUTCTime', 'DESC')
+        .limit(1)
+        .getOne()
+    }
+  }
+
+  async function pruneDataEntries<R extends DataSeriesEntryStatic>(EntryClass: R, serie: DataSeries, trn?: EntityManager): Promise<void> {
+    const mgr = trn || dataSource.manager
+
+    await mgr.getRepository(EntryClass).createQueryBuilder()
+    .delete()
+    .from(EntryClass)
+    .where('dataSeries = :dsId AND UTCTime >= :date', {
+      dsId: serie.id,
+      date: EntryClass.getIntervalBegin(serie.lastProcessedUTCQhour, serie.timezone)
+    })
+    .execute()
+  }
+
+  async function agregateValue<R extends DataSeriesEntryStatic>(EntryClass: R, serie: DataSeries, qhour: Date, trn?: EntityManager): Promise<void> {
+    const mgr = trn || dataSource.manager
+
+    // Agregate only if the end of qhour matches the end of agregated interval
+    if (!EntryClass.isEndOfInterval(DataSeriesQhourly.intervalShift(qhour, 1))) {
+      return
+    }
+
+    const interval = EntryClass.normalizeInterval(EntryClass.getInterval(qhour, serie.timezone))
+
     const list = await mgr.getRepository(DataSeriesQhourly).createQueryBuilder('dsq')
-    .where('dsq.dataSeries = :serie AND localTime >= :beg AND localTime < :end', {
+    .where('dsq.dataSeries = :serie AND dsq.UTCTime >= :beg AND dsq.UTCTime < :end', {
       serie: serie,
-      beg: sqlTimeStringWithTimezone(start, serie.timezone),
-      end: sqlTimeStringWithTimezone(end, serie.timezone)
+      beg: interval.begin,
+      end: interval.end
     })
     .getMany()
 
-    return list.reduce((cnt, item) => {
-      return cnt + item.value
+    const entry = await EntryClass.entryForInterval(serie, interval.begin, mgr)
+    entry.value += list.reduce((acc, item) => {
+      return acc + item.value
     }, 0)
+    
+    mgr.getRepository(EntryClass).save(entry)
   }
 
   function shouldRunNow(): boolean {
     const now = new Date()
     const minutes = now.getUTCMinutes()
     return !((minutes - processMinuteInQHour) % 15)
-  }
-
-  const QHOUR_MS = 1000 * 60 * 15
-  function qhourBegin(utcDate: Date): Date {
-    return new Date((Math.floor(utcDate.getTime() / QHOUR_MS))* QHOUR_MS) 
-  }
-
-  const HOUR_MS = QHOUR_MS * 4
-  function hourBegin(utcDate:Date): Date {
-    return new Date((Math.floor(utcDate.getTime() / HOUR_MS))* HOUR_MS) 
-  }
-
-  const DAY_MS = HOUR_MS * 24
-  function dayBegin(utcDate:Date): Date {
-    return new Date((Math.floor(utcDate.getTime() / DAY_MS))* DAY_MS) 
-  }
-
-  function monthBegin(utcDate: Date): Date {
-    const db = dayBegin(utcDate)
-    db.setDate(0)
-    return db
-  }
-
-  function isInDSTtoSTDTransition(utcDate: Date, timezone: string): boolean {
-
-  }
-
-  function qhourShift(utcDate: Date, shift: number): Date {
-
-  }
-
-  function hoursShift(utcDate: Date, shift: number): Date {
-
-  }
-
-  function sqlTimeStringWithTimezone(utcDate: Date, timezone: string): string {
-
-  }
-
-  async function qhourEntryForUTCTime(serie: DataSeries, qhour: Date, trn: EntityManager): DataSeriesQhourly {
-
-  }
-
-  async function hourEntryForUTCTime(serie: DataSeries, qhour: Date, trn: EntityManager): DataSeriesHourly {
-
-  }
-
-  async function dayEntryForUTCTime(serie: DataSeries, qhour: Date, trn: EntityManager): DataSeriesDaily {
-
-  }
-
-  async function monthlyEntryForUTCTime(serie: DataSeries, qhour: Date, trn: EntityManager): DataSeriesMonthly {
-
   }
 
   return {

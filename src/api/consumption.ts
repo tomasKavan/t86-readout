@@ -1,5 +1,5 @@
 import express from 'express'
-import { Meter } from '../models'
+import { DataSeriesDaily, Meter } from '../models'
 
 export default function (dataSource, config) {
   const router = express.Router()
@@ -19,8 +19,8 @@ export default function (dataSource, config) {
   
     console.log('[API]: Query /api/spotreba/:from/:to [' + fromD + ' - ' + toD + ']')
   
-    const list = await AppDataSource.manager
-      .createQueryBuilder(ConsumptionDaily, 'cd')
+    const list = await dataSource.manager
+      .createQueryBuilder(DataSeriesDaily, 'cd')
       .innerJoinAndSelect('cd.consumptionPlace', 'cp')
       .where('cd.time >= :od', {od: fromD})
       .andWhere('cd.time < :do', {do: toD})

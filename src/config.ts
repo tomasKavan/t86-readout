@@ -17,7 +17,7 @@ interface Config {
 const config: Config = {
   db: {
     host: process.env.DB_HOST || 'localhost',
-    port: parseInt(process.env.DB_PORT) || 3363,
+    port: parseInt(process.env.DB_PORT) || 3306,
     user: process.env.DB_USER || 'readout',
     pass: process.env.DB_PASS || 'oh.G.read.4',
     name: process.env.DB_NAME || 'readout2',

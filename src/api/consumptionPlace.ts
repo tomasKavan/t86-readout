@@ -1,5 +1,5 @@
 import express from 'express'
-import { ConsumptionPlace } from '../models'
+import { Site } from '../models'
 
 export default function (dataSource, config) {
   const router = express.Router()
@@ -8,7 +8,7 @@ export default function (dataSource, config) {
   router.get('/', async (req, res) => {
     console.log(`[API]: Query ${req.path}`)
     const list = await dataSource.manager
-      .createQueryBuilder(ConsumptionPlace, 'cp')
+      .createQueryBuilder(Site, 'cp')
       .innerJoinAndSelect('cp.medium', 'me')
       .orderBy('cp.mbusPrimary')
       .getMany()
@@ -28,7 +28,7 @@ export default function (dataSource, config) {
       return
     }
     const list = await dataSource.manager
-      .createQueryBuilder(ConsumptionPlace, 'cp')
+      .createQueryBuilder(Site, 'cp')
       .innerJoinAndSelect('cp.medium', 'me')
       .where('cp.mbusPrimary = :mbp', {mbp: id})
       .getOne()

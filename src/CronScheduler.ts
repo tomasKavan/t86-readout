@@ -127,10 +127,8 @@ export class CronScheduler<ParamsType> {
       if (Math.abs(nextExe - now) < 1000) {
         if (task.isRunning) {
           console.log(`[CRON Scheduler] SKIPPED Task <${task.id}>. Already running.`)
-          continue;
+          continue
         }
-
-        task.isRunning = true
 
         // Run
         (async () => {
@@ -144,6 +142,8 @@ export class CronScheduler<ParamsType> {
             task.isRunning = false
           }
         })()
+
+        task.isRunning = true
 
       }
     }

@@ -8,7 +8,6 @@ import {
   OneToMany
 } from "typeorm"
 import { SiteCharacteristic } from "./SiteCharacteristic"
-import { GeoLocation } from "./GeoLocation"
 import { DataSeriesQhourly } from "./DataSeriesQhourly"
 import { DataSeriesHourly } from "./DataSeriesHourly"
 import { DataSeriesDaily } from "./DataSeriesDaily"

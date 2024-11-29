@@ -1,20 +1,18 @@
 import express from 'express'
 import meter from './meter'
 import meterType from './meterType'
-import medium from './medium'
 import consumptionPlace from './consumptionPlace'
 import consumption from './consumption'
 
 export default function (dataSource, config) {
   const router = express.Router()
 
-  router.use(auth)
+  //router.use(auth)
 
-  router.use('/data-serie', consumption(dataSource, config))
-  router.use('/meter', meter(dataSource, config))
-  router.use('/meter-type', meterType(dataSource, config))
-  router.use('/medium', medium(dataSource, config))
-  router.use('/consumption-place', consumptionPlace(dataSource, config))
+  // router.use('/data-serie', consumption(dataSource, config))
+  // router.use('/meter', meter(dataSource, config))
+  // router.use('/meter-type', meterType(dataSource, config))
+  // router.use('/consumption-place', consumptionPlace(dataSource, config))
 
   function auth(req, res, next) {
     const b64auth = (req.headers.authorization || '').split(' ')[1] || ''

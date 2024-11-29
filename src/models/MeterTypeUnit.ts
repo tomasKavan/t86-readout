@@ -21,7 +21,7 @@ export class MeterTypeUnit {
   @Column('varchar')
   public name: string
 
-  @Column('enum', { enum: Function })
+  @Column('enum', { enum: Function, default: () => Function.INSTANT })
   public function: Function
 
   @Column('enum', { enum: Unit })

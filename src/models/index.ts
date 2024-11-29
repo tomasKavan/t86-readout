@@ -4,7 +4,6 @@ import { DataSeriesQhourly } from './DataSeriesQhourly'
 import { DataSeriesHourly } from './DataSeriesHourly'
 import { DataSeriesDaily } from './DataSeriesDaily'
 import { DataSeriesMonthly } from './DataSeriesMonthly'
-import { GeoLocation } from './GeoLocation'
 import { Meter } from './Meter'
 import { MeterType } from './MeterType'
 import { MeterTypeUnit } from './MeterTypeUnit'
@@ -16,9 +15,11 @@ import { Site } from './Site'
 import { SiteMeterInstallation } from './SiteMeterInstallation'
 import { SiteMeterInstallationMBus } from './SiteMeterInstallationMbus'
 import { SiteMeterInstallationApi } from './SiteMeterInstallationApi'
-import { SiteMeterInstallationMap } from './InstallationMap'
-
+import { InstallationMap } from './InstallationMap'
+import { InstallationMapMbus } from './InstallationMapMbus'
 import { SiteMeterInstallationTriggers } from './SiteMeterInstallation'
+import { SiteCharacteristic } from './SiteCharacteristic'
+import { SiteLog } from './SiteLog'
 
 const modelsArray = [
   DataSeries, 
@@ -26,7 +27,6 @@ const modelsArray = [
   DataSeriesHourly,
   DataSeriesDaily,
   DataSeriesMonthly,
-  GeoLocation,
   Meter,
   MeterType,
   MeterTypeUnit,
@@ -38,7 +38,10 @@ const modelsArray = [
   SiteMeterInstallation,
   SiteMeterInstallationMBus,
   SiteMeterInstallationApi,
-  SiteMeterInstallationMap
+  InstallationMap,
+  InstallationMapMbus,
+  SiteCharacteristic,
+  SiteLog
 ]
 
 const subscribersArray = [
@@ -53,7 +56,6 @@ export {
   DataSeriesHourly,
   DataSeriesDaily,
   DataSeriesMonthly,
-  GeoLocation,
   Meter,
   MeterType,
   MeterTypeUnit,
@@ -65,5 +67,8 @@ export {
   SiteMeterInstallation,
   SiteMeterInstallationMBus,
   SiteMeterInstallationApi,
-  SiteMeterInstallationMap
+  InstallationMap,
+  InstallationMapMbus,
+  SiteCharacteristic,
+  SiteLog
 }
