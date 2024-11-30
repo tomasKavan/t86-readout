@@ -1,0 +1,32 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "npm",
+			"script": "build",
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"problemMatcher": [],
+			"label": "Build ALL",
+			"detail": "npm-run-all clean tsc"
+		},
+		{
+			"type": "npm",
+			"script": "build:cli",
+			"group": "build",
+			"problemMatcher": [],
+			"label": "Build CLI",
+			"detail": "npm-run-all clean tsc:cli"
+		},
+		{
+			"type": "npm",
+			"script": "build:service",
+			"group": "build",
+			"problemMatcher": [],
+			"label": "Build SERVICE",
+			"detail": "npm-run-all clean tsc:service"
+		}
+	]
+}

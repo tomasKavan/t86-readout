@@ -1,0 +1,38 @@
+{
+  "configurations": [
+    {
+      "name": "Debug SERVICE",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev:service"],
+      "outFiles": ["${workspaceFolder}/dist/service/**/*.(m|c|)js"],
+      "skipFiles": ["<node_internals>/**"],
+      "sourceMaps": true,
+      "resolveSourceMapLocations": [
+        "${workspaceFolder}/**",
+        "!**/node_modules/**"
+      ],
+      "console": "integratedTerminal",
+      "autoAttachChildProcesses": true,
+      "restart": true
+    },
+    {
+      "name": "Debug CLI",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev:cli"],
+      "outFiles": ["${workspaceFolder}/dist/cli/**/*.(m|c|)js"],
+      "skipFiles": ["<node_internals>/**"],
+      "sourceMaps": true,
+      "resolveSourceMapLocations": [
+        "${workspaceFolder}/**",
+        "!**/node_modules/**"
+      ],
+      "console": "integratedTerminal",
+      "autoAttachChildProcesses": true,
+      "restart": true
+    }
+  ]
+}
