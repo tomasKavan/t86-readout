@@ -1,18 +1,8 @@
 {
-  "compilerOptions": {
-    "target": "es6",
-    "module": "commonjs",
-    "lib": ["dom", "es6"],
-    "sourceMap": true,
-    "outDir": "dist",
-    "rootDir": "src",
-    "moduleResolution": "node",
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,    
-    "skipLibCheck": true,
-    "esModuleInterop": true,
-  },
-  "compileOnSave": true,
-  "exclude": ["node_modules"],
-  "include": ["src/**/*.ts"]
+  "extends": "./tsconfig.options.json",
+  "files": [],
+  "references": [
+    { "path": "./src/service/tsconfig.service.json" },
+    { "path": "./src/cli/tsconfig.cli.json" }
+  ]
 }

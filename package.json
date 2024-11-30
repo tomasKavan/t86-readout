@@ -18,12 +18,21 @@
     "typescript": "^5.5.4"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "clean": "rimraf dist/*",
-    "tsc": "tsc",
-    "dev": "npm-run-all build watch",
+    "clean:service": "rimraf dist/service",
+    "clean:cli": "rimraf dist/cli",
+    "tsc": "tsc -b",
+    "tsc:service": "tsc -p tsconfig.service.json",
+    "tsc:cli": "tsc -p tsconfig.cli.json",
+    "dev:service": "npm-run-all build watch",
     "build": "npm-run-all clean tsc",
-    "watch": "tsc-watch --onSuccess \"node dist/index\" --onFailure \"echo Beep! Compilation Failed\" --compiler typescript/bin/tsc"
+    "build:service": "npm-run-all clean tsc:service",
+    "build:cli": "npm-run-all clean tsc:cli",
+    "watch": "tsc-watch -p src/service/tsconfig.service.json --onSuccess \"node dist/service/index\" --onFailure \"echo Beep! Compilation Failed\" --compiler typescript/bin/tsc"
+  },
+  "main": "dist/service/index.js",
+  "bin": {
+    "readoutcli": "./dist/cli/index.js"
   },
   "repository": {
     "type": "git",
