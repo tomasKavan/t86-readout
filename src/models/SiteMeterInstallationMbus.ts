@@ -14,7 +14,7 @@ export class SiteMeterInstallationMBus extends SiteMeterInstallation {
   @Column('int')
   public mbusPrimary: number
 
-  @Column('int', { default: () => 1 })
+  @Column('int', { default: 1 })
   public baseReadoutFrequencyDivider: number
 
   @OneToMany(() => InstallationMapMbus, smim => smim.installation)

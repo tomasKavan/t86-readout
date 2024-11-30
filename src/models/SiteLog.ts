@@ -32,7 +32,7 @@ export class SiteLog {
   })
   public siteMeterInstallation: SiteMeterInstallation
 
-  @Column('boolean', { default: () => true })
+  @Column('boolean', { default: true })
   public valid: boolean
 
   @Column('datetime', { precision: 0 })
@@ -56,6 +56,7 @@ export class SiteLog {
   @UpdateDateColumn({
     type: 'datetime',
     precision: 0,
+    default: () => 'CURRENT_TIMESTAMP(0)',
     onUpdate: 'CURRENT_TIMESTAMP(0)'
   })
   updatedUTCTime: Date

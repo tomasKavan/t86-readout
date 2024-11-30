@@ -40,7 +40,7 @@ export class DataSeries {
 
   @Column('enum', { 
     enum: ProcessingMethod, 
-    default: () => ProcessingMethod.DIFFERENCE 
+    default: ProcessingMethod.DIFFERENCE 
   })
   public processingMethod: ProcessingMethod
 
@@ -50,7 +50,7 @@ export class DataSeries {
   @Column('datetime', { precision: 0 })
   public updatesProcessedUntilUTCTime: Date
 
-  @Column('boolean', { default: () => true })
+  @Column('boolean', { default: true })
   public processingEnabled: boolean
 
   @Column('datetime', { 

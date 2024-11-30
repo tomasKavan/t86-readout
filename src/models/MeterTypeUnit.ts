@@ -8,9 +8,9 @@ import {
   UpdateDateColumn,
   TableInheritance
 } from "typeorm"
-import { Function, Unit } from "./SiteCharacteristic"
 import { MeterType } from "./MeterType"
 import { InstallationMap } from "./InstallationMap"
+import { Function, Unit } from "./SiteCharacteristicEnums"
 
 @Entity()
 @TableInheritance({ column: { type: 'varchar', name: 'methodType' }})
@@ -21,13 +21,13 @@ export class MeterTypeUnit {
   @Column('varchar')
   public name: string
 
-  @Column('enum', { enum: Function, default: () => Function.INSTANT })
+  @Column('enum', { enum: Function })
   public function: Function
 
   @Column('enum', { enum: Unit })
   public unit: Unit
 
-  @Column('int', { default: () => 0 })
+  @Column('int', { default: 0 })
   public rescaleOrder: number
 
   @ManyToOne(() => MeterType, mt => mt.units, {

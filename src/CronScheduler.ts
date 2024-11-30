@@ -53,7 +53,7 @@ export class CronScheduler<ParamsType> {
     if (this._cronTickIntervalId) {
       return
     }
-    this._cronTickIntervalId = setInterval(this._cronTick, CRON_INTERVAL_MS)
+    this._cronTickIntervalId = setInterval(this._cronTick.bind(this), CRON_INTERVAL_MS)
     console.log(`[CRON Scheduler] ENABLED`)
   }
 

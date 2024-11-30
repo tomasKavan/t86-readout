@@ -21,7 +21,7 @@ export class ReadMethod {
   @Column('text')
   public description: string
 
-  @Column('boolean', { default: () => true })
+  @Column('boolean', { default: true })
   public enabled: boolean
 
   @CreateDateColumn({

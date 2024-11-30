@@ -20,6 +20,7 @@ import { InstallationMapMbus } from './InstallationMapMbus'
 import { SiteMeterInstallationTriggers } from './SiteMeterInstallation'
 import { SiteCharacteristic } from './SiteCharacteristic'
 import { SiteLog } from './SiteLog'
+import { ReadMethodScheduled } from './ReadMethodScheduled'
 
 const modelsArray = [
   DataSeries, 
@@ -32,6 +33,7 @@ const modelsArray = [
   MeterTypeUnit,
   MeterTypeUnitMbus,
   ReadMethod,
+  ReadMethodScheduled,
   ReadMethodMBus,
   ReadMethodApi,
   Site,
@@ -61,6 +63,7 @@ export {
   MeterTypeUnit,
   MeterTypeUnitMbus,
   ReadMethod,
+  ReadMethodScheduled,
   ReadMethodMBus,
   ReadMethodApi,
   Site,

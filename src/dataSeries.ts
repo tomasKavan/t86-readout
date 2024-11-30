@@ -27,7 +27,7 @@ export default function DataSeriesScheduler(dataSource: DataSource, config: Data
       processDataSeries()
     }
 
-    intervalId = setTimeout(tick, TICK_INTERVAL_MS)
+    intervalId = setInterval(tick, TICK_INTERVAL_MS)
   }
 
   function disable() {
