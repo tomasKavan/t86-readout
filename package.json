@@ -7,6 +7,8 @@
     "tsc-watch": "^6.2.0"
   },
   "dependencies": {
+    "@types/cli-table": "^0.3.4",
+    "cli-table3": "^0.6.5",
     "cron-parser": "^4.9.0",
     "cron-validator": "^1.3.1",
     "express": "^4.19.2",
@@ -16,7 +18,8 @@
     "typedi": "^0.10.0",
     "typeorm": "^0.3.20",
     "typeorm-typedi-extensions": "^0.4.1",
-    "typescript": "^5.5.4"
+    "typescript": "^5.5.4",
+    "yargs": "^17.7.2"
   },
   "scripts": {
     "clean": "rimraf dist/*",
@@ -26,7 +29,7 @@
     "tsc:service": "tsc -p tsconfig.service.json",
     "tsc:cli": "tsc -p tsconfig.cli.json",
     "dev:service": "npm-run-all build watch",
-    "dev:cli": "npm-run-all build start",
+    "dev:cli": "npm-run-all build \"start -- {@}\" --",
     "build": "npm-run-all clean tsc",
     "build:service": "npm-run-all clean tsc:service",
     "build:cli": "npm-run-all clean tsc:cli",
