@@ -1,0 +1,42 @@
+1:0 elec - Elektřina Byt 1 0.0.3 v RSS
+2:0 elec - Elektřina Byt 2 0.0.3 v RSS
+3:0 elec - Elektřina Byt 3 0.0.3 v RSS
+4:0 elec - Elektřina Byt 4 0.0.3 v RSS
+5:0 elec - Elektřina Kotelna 0.0.3 v RSS
+6:0 elec - Elektřina Nabíječka Venek 0.0.3 v RSS
+7:0 elec - Elektřina Nabíječka Garáž 0.0.3 v RSS
+8:0 elec - Elektřina Dílna 0.0.3 v RSS
+9:0 elec - Elektřina Společné prostory 0.0.3 v RSS
+10:0 elec - Elektřina Zahradní domek 0.0.3 v RSS
+11:0 elec - Elektřina Vířivka v zahradě 1.0.3 v RZ
+12:0 elec - Elektřina Sauna v zahradě 1.0.3 v R5 (zapojen za měřením domečku)
+16:2 cwat - Studená Voda Dílna 0.0.6 vedle bojleru
+17:2 hwat - Teplá Voda Dílna 0.0.6 vedle bojleru
+18:2 cwat - Studená Voda Byt 1 0.1.1 V podhledu
+19:2 cwat - Studená voda zahrada 0.1.1 V podhledu
+20:2 hwat - Teplá Voda Byt 1 umyvadlo 0.1.4 V podhledu nad umyvadlem
+21:2 hwat - Teplá Voda Byt 1 sprcha, kuchyně 0.1.4 V podhledu nad sprchou
+22:2 cwat - Studená Voda Byt 2 hlavní koupelna. kuchyně 1.1.6 V podhledu, levý otvor
+23:2 hwat - Teplá Voda Byt 2 hlavní koupelna, kuchyně 1.1.6 V podhledu, levý otvor
+24:2 cwat - Studená Voda Byt 2 malá koupelna 1.1.3 V podhledu
+25:2 hwat - Teplá Voda Byt 2 malá koupelna 1.1.3 V podhledu
+26:2 cwat - Studená Voda Byt 3 kuchyně 2.3.5 Za linkou u vchodu
+27:2 hwat - Teplá Voda Byt 3 kuchyně 2.3.5 Za linkou u vchodu
+28:2 cwat - Studená Voda Byt 3 Koupelna 2.3.4 V Podhledu
+29:2 hwat - Teplá Voda Byt 3 Koupelna 2.3.4 V Podhledu
+30:2 cwat - Studená Voda Byt 4 Sauna 2.3.4 V Podhledu
+31:2 hwat - Teplá Voda Byt 4 Sauna 2.3.4 V Podhledu
+32:2 cwat - Studená Voda Byt 4 Technická koupelna, kuchyně 2.4.3 V Podhledu
+33:2 hwat - Teplá Voda Byt 4 Technická koupelna, kuchyně 2.4.3 V Podhledu
+34:2 cwat - Studená Voda Byt 4 Hlavní koupelna 1.1.6 V Podhledu, pravý otvor
+35:2 hwat - Teplá Voda Byt 4 Hlavní koupelna 1.1.6 V Podhledu, pravý otvor
+36:2 cwat - Studená Voda Byt 4 Horní koupelna 2.4.6 V Podhledu
+37:2 hwat - Teplá Voda Byt 4 Horní koupelna 2.4.6 V Podhledu
+38:2 cwat - Studená Voda Garáž, Zahradní domek 1.0.3 Stěna, na podestě
+39:2 hwat - Teplá Voda Garáž 1.0.3 Stěna, na podestě
+45:2 heat - Ohřev Teplé vody 0.0.6 
+46:2 heat - Vytápění Společné prostory 0.0.6 
+47:2 heat - Vytápění Byt 1 0.0.6 
+48:2 heat - Vytápění Byt 2 0.0.6 
+49:2 heat - Vytápění Byt 3 0.0.6 
+50:2 heat - Vytápění Byt 4 2.3.5 
