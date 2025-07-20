@@ -1,4 +1,7 @@
+import path from 'path'
+import fs from 'fs'
 import MBusCmd from './mbus'
+import { coerce } from 'yargs'
 
 export default {
   command: 'readout',
@@ -15,11 +18,20 @@ export default {
     .option('o', {
       alias: 'outFile', 
       type: 'string',
-      description: 'Path to file to print output to.'
+      description: 'Path to file to print output to.',
+      coerce: validateFilePath
     })
     .command(MBusCmd)
   },
   handler: () => {
     throw new Error('Command readout does nothing. Try to use command mbus instead.')
   }
+}
+
+function validateFilePath(filePath: string): string {
+  const ap = path.resolve(filePath)
+  if (fs.existsSync(ap)) {
+    throw new Error(`Output file ${filePath} already exists`)
+  }
+  return ap
 }

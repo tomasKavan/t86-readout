@@ -1,17 +1,12 @@
 import { LoggerOptions } from "typeorm"
-import { DataSourceConfigOptions } from "./dataSource"
-import { ReadoutSchedulerOptions } from "./readout"
-import { DataSeriesConfigOptions } from "./dataSeries"
+import { DbDataSourceConfigOptions } from "./dbDataSource"
+import { MbusDataSourceConfigOptions } from "./mbusDataSource"
+import { SchedulerOptions } from "./scheduler"
 
 interface Config {
-  db: DataSourceConfigOptions,
-  api: {
-    port: number,
-    user: string,
-    secret: string
-  },
-  schedule: ReadoutSchedulerOptions,
-  dataSeries: DataSeriesConfigOptions
+  db: DbDataSourceConfigOptions,
+  mbus: MbusDataSourceConfigOptions,
+  scheduler: SchedulerOptions
 }
 
 const config: Config = {
@@ -23,19 +18,14 @@ const config: Config = {
     name: process.env.DB_NAME || 'readout2',
     logging: processLoggerOptions(process.env.DB_LOGLEVEL)
   },
-  api: {
-    port: parseInt(process.env.API_PORT) || 8086,
-    user: 'readout',
-    secret: '65did!U!read?!65'
+  mbus: {
+    host: process.env.MBUS_HOST || '127.0.0.1',
+    port: parseInt(process.env.MBUS_PORT) || 1234,
+    timeout: parseInt(process.env.MBUS_TIMEOUT_MS) || 4000
   },
-  schedule: {
-    refreshScheduleEachMs: parseInt(process.env.REFRESH_SCHEDULE_EACH_MS) || 1000,
-    onStart: booleanFromEnv(process.env.SCHEDULE_ONSTART) || false
-  },
-  dataSeries: {
-    processOnMinute: Math.max(0, Math.min(14, parseInt(process.env.DATASERIES_PROCESS_ON_MINUTE) || 5)),
-    onStart: booleanFromEnv(process.env.DATASERIES_ONSTART) || false,
-    skipQHoursFromNow: Math.max(1, parseInt(process.env.DATASERIES_SKIP_QHOURS_FROMNOW) || 1)
+  scheduler: {
+    offset: parseInt(process.env.SCHEDULE_OFFSET_MS) || 0,
+    each: parseInt(process.env.SCHEDULE_EACH_MS) || 900000 // Default each 15 minutes
   }
 }
 

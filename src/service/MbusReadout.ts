@@ -8,9 +8,24 @@ enum State {
   Disconnecting = 'disconnecting'
 }
 
+export enum ErrCode {
+  E_MBUS_CONNECTION,
+  E_MBUS_SLAVE_READ,
+  E_MBUS_SERIAL_MISMATCH,
+}
+
+export class MbusError extends Error {
+  code: ErrCode
+
+  constructor(code: ErrCode, message: string?) {
+    super(message)
+    this.code = code
+  }
+}
+
 export type ReadSlaveRecordQuery = {
   recordId: number,
-  rescaleOrder?: number
+  decimalShift?: number
 }
 
 export type ReadSlaveQuery = {
@@ -26,13 +41,13 @@ export type ReadSlaveRecordData = {
   value?: number,
   originalValue?: number
   timestamp?: Date,
-  error?: Error
+  error?: MbusError
 }
 
 export type ReadSlaveResponse = {
   query: ReadSlaveQuery,
   data: ReadSlaveRecordData[],
-  error?: Error
+  error?: MbusError
 }
 
 export class MbusReadout {
@@ -100,41 +115,57 @@ export class MbusReadout {
       }
       dataList.push(outAddr)
 
+      let rawData: any = undefined
+      let error: MbusError? = undefined
       try {
-        const rawData = await this.readAddress(q.primaryAddress)
-
-        // Check serial number
-        if (rawData.SlaveInformation.Id !== q.serial) {
-          throw new Error(`[MBusReader] Primary ${q.primaryAddress}: Meter S/N ${rawData.SlaveInformation.Id} doesn't match S/N ${q.serial} in DB`)
-        }
-
-        // Get records
-        for (const qRec of q.records) {
-          const rec = rawData.DataRecord.find(item => {
-            return item.id === qRec.recordId
-          })
-          if (!rec) {
-            outAddr.data.push({
-              recordId: qRec.recordId,
-              error: new Error(`[MBusReader] Primary ${q.primaryAddress}: Record id ${qRec.recordId} not found on readout`)
-            })
-          } else {
-            const value = rec.Value as number * Math.pow(10, (qRec.rescaleOrder || 0))
-            const outRec: ReadSlaveRecordData = {
-              recordId: rec.id as number,
-              function: rec.Function as string,
-              unit: rec.Unit as string,
-              value: value,
-              originalValue: rec.Value as number,
-              timestamp: new Date(rec.Timestamp)
-            }
-            outAddr.data.push(outRec)
-          }
-        }
+        rawData = await this.readAddress(q.primaryAddress)
       } catch (e) {
-        outAddr.error = new Error(`[MBusReadout] Error when reading/processing slave data. ${e}`)
+        error = new MbusError(ErrCode.E_MBUS_CONNECTION, e.message)
       }
-    }
+
+      if (!error) {
+        if (rawData.SlaveInformation.Id !== q.serial) {
+          error = new MbusError(
+            ErrCode.E_MBUS_SERIAL_MISMATCH, 
+            `[MBusReader] Primary ${q.primaryAddress}: Meter S/N ${rawData.SlaveInformation.Id} doesn't match S/N ${q.serial} in DB`
+          )
+        }
+      }
+
+      // Get records
+      for (const qRec of q.records) {
+        if (error) {
+          outAddr.data.push({
+            recordId:qRec.recordId,
+            error: error
+          })
+          continue
+        }
+
+        const rec = rawData.DataRecord.find(item => {
+          return item.id === qRec.recordId
+        })
+        if (!rec) {
+          outAddr.data.push({
+            recordId: qRec.recordId,
+            error: new MbusError(
+              ErrCode.E_MBUS_SLAVE_READ, 
+              `[MBusReader] Primary ${q.primaryAddress}: Record id ${qRec.recordId} not found on readout`
+            )
+          })
+          continue
+        }
+        const value = rec.Value as number * Math.pow(10, (qRec.decimalShift || 0))
+        const outRec: ReadSlaveRecordData = {
+          recordId: rec.id as number,
+          function: rec.Function as string,
+          unit: rec.Unit as string,
+          value: value,
+          originalValue: rec.Value as number,
+          timestamp: new Date(rec.Timestamp)
+        }
+        outAddr.data.push(outRec)
+      }
 
     return dataList
   }

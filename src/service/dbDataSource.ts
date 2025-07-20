@@ -1,7 +1,7 @@
 import { DataSource, LoggerOptions } from 'typeorm'
-import { modelsArray, subscribersArray } from './models/index'
+import { modelsArray } from './models/index'
 
-export type DataSourceConfigOptions = {
+export type DbDataSourceConfigOptions = {
     host: string,
     port: number,
     user: string,
@@ -10,7 +10,7 @@ export type DataSourceConfigOptions = {
     logging: LoggerOptions
 }
 
-export default function initDataSource (config: DataSourceConfigOptions) {
+export default function configureDataSource (config: DbDataSourceConfigOptions) {
   return new DataSource({
     type: 'mysql',
     host: config.host,
@@ -19,7 +19,6 @@ export default function initDataSource (config: DataSourceConfigOptions) {
     password: config.pass,
     database: config.name,
     entities: modelsArray,
-    subscribers: subscribersArray,
     synchronize: true,
     logging: config.logging,
     

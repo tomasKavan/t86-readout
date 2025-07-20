@@ -8,8 +8,6 @@
 8:0 elec - Elektřina Dílna 0.0.3 v RSS
 9:0 elec - Elektřina Společné prostory 0.0.3 v RSS
 10:0 elec - Elektřina Zahradní domek 0.0.3 v RSS
-11:0 elec - Elektřina Vířivka v zahradě 1.0.3 v RZ
-12:0 elec - Elektřina Sauna v zahradě 1.0.3 v R5 (zapojen za měřením domečku)
 16:2 cwat - Studená Voda Dílna 0.0.6 vedle bojleru
 17:2 hwat - Teplá Voda Dílna 0.0.6 vedle bojleru
 18:2 cwat - Studená Voda Byt 1 0.1.1 V podhledu
