@@ -1,12 +1,12 @@
-import path from 'path'
-import fs from 'fs'
+import * as path from 'path'
+import * as fs from 'fs'
 import MBusCmd from './mbus'
 import { coerce } from 'yargs'
 
 export default {
   command: 'readout',
   describe: 'Fetch values from meters',
-  builder: (yargs) => {
+  builder: (yargs: any) => {
     return yargs
     .option('f', {
       alias: 'format',

@@ -4,11 +4,12 @@ import {
   DeleteDateColumn, 
   Entity, 
   ManyToOne, 
-  PrimaryColumn, 
+  PrimaryGeneratedColumn, 
   UpdateDateColumn 
 } from "typeorm"
 import { Metric } from "./Metric"
 import { ServiceEvent } from "./ServiceEvent"
+import { ErrCode } from "../MbusReadout"
 
 export enum Type {
   READOUT = 'rout',
@@ -21,36 +22,34 @@ export enum Source {
   MANUAL = 'man'
 }
 
-enum ErrCode {
-  E_MBUS_CONNECTION,
-  E_MBUS_SLAVE_READ,
-  E_MBUS_SERIAL_MISMATCH,
-}
-
 @Entity()
 export class Readout {
-  @PrimaryColumn()
-  public id: number
+  @PrimaryGeneratedColumn()
+  public id!: number
 
   @ManyToOne(() => Metric, m => m.readouts)
-  public metric: Metric
+  public metric!: Metric
 
   @Column('enum', { enum: Type })
-  public type: Type
+  public type!: Type
 
   @Column('enum', { enum: Source })
-  public source: Source
+  public source!: Source
 
   @Column('bigint', { default: 0 })
-  public value: number
+  public value!: number
 
-  @Column('enum', { nullable: true })
-  public errCode: ErrCode
+  @Column('enum', { enum: ErrCode, nullable: true })
+  public errCode!: ErrCode
 
   @Column('varchar', { nullable: true })
-  public errDetail: string
+  public errDetail!: string
 
-  @ManyToOne(() => ServiceEvent, se => se.corrections, { nullable: true })
+  @ManyToOne(() => ServiceEvent, se => se.corrections, { 
+    nullable: true,
+    onUpdate: 'CASCADE',
+    onDelete: 'RESTRICT'
+  })
   public relatedServiceEvent?: ServiceEvent
 
   @Column('datetime', { precision: 0, nullable: true })
@@ -61,7 +60,7 @@ export class Readout {
     precision: 0,
     default: () => 'CURRENT_TIMESTAMP(0)',
   })
-  public createdUTCTime: Date
+  public createdUTCTime!: Date
 
   @UpdateDateColumn({
     type: 'datetime',
@@ -69,7 +68,7 @@ export class Readout {
     default: () => 'CURRENT_TIMESTAMP(0)',
     onUpdate: 'CURRENT_TIMESTAMP(0)'
   })
-  public updatedUTCTime: Date
+  public updatedUTCTime!: Date
 
   @DeleteDateColumn({
     type: 'datetime',

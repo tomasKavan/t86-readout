@@ -1,7 +1,8 @@
 import { DataSource, IsNull, Not } from "typeorm"
-import { MbusReadout, ReadSlaveQuery } from "./MbusReadout"
+import { MbusReadout, ReadSlaveQuery, ReadSlaveResponse } from "./MbusReadout"
 import { Metric, Readout } from "./models"
 import { Type as ReadoutType, Source as ReadoutSource } from "./models/Readout"
+import { logger } from "./logger"
 
 export type MbusDataSourceConfigOptions = {
   host: string,
@@ -10,9 +11,12 @@ export type MbusDataSourceConfigOptions = {
 }
 
 export default function configureMbusDataSource(config: MbusDataSourceConfigOptions) {
+  logger.debug(`[MBusReadout] Configuring (${JSON.stringify(config)})`)
   const mbus = new MbusReadout(config)
 
   async function readout(db: DataSource) {
+    logger.info(`[MBusReadout] Executing M-Buse readout sequence`)
+
     const mrep = db.manager.getRepository(Metric)
     const metrics = await mrep.find({
       where:{ 
@@ -23,6 +27,9 @@ export default function configureMbusDataSource(config: MbusDataSourceConfigOpti
         measPoint: true
       }
     })
+
+    logger.info(`[MBusReadout] -- Got ${metrics.length} metrics`)
+    logger.debug(JSON.stringify(metrics))
 
     const list: ReadSlaveQuery[] = []
 
@@ -42,7 +49,18 @@ export default function configureMbusDataSource(config: MbusDataSourceConfigOpti
       })
     }
 
-    const res = await mbus.readInputs(list)
+    logger.info(`[MBusReadout] -- Reading ${list.length} M-Bus slaves...`)
+    let res: ReadSlaveResponse[] = []
+    try {
+      await mbus.connect()
+      res = await mbus.readInputs(list)
+      await mbus.close()
+    } catch (e) {
+      logger.error(`[MBusReadout] -- M-Bus slaves read Error (${e})`)
+      return  
+    }
+    logger.info(`[MBusReadout] -- M-Bus slaves read finished...`)
+    logger.debug(JSON.stringify(res))
 
     const readoutList: Readout[] = []
 
@@ -54,18 +72,26 @@ export default function configureMbusDataSource(config: MbusDataSourceConfigOpti
         })
         if (!metric) {
           // TODO: Log error and skip
+          continue
         }
         const readout = new Readout()
         readout.metric = metric
         readout.source = ReadoutSource.MBUS
-        readout.meterUTCTimestamp = rec.timestamp
+        readout.meterUTCTimestamp = rec.timestamp ?? new Date()
 
         if (slave.error || rec.error) {
           readout.type = ReadoutType.ERROR
+          if (slave.error) {
+            readout.errCode = slave.error.code
+            readout.errDetail = slave.error.message
+          } else if (rec.error) {
+            readout.errCode = rec.error.code
+            readout.errDetail = rec.error.message
+          }
           // TODO: process error into Readout entry
         } else {
           readout.type = ReadoutType.READOUT
-          readout.value = rec.value
+          readout.value = rec.value ?? 0
         }
         
         readoutList.push(readout)

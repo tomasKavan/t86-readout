@@ -1,5 +1,5 @@
-import * as MbusMasterDef from "node-mbus"
-const MbusMaster = MbusMasterDef.default
+import MBusMaster, { MBusMasterOptions } from "node-mbus"
+import { logger } from "./logger"
 
 enum State {
   Disconnected = 'disconnected',
@@ -9,15 +9,15 @@ enum State {
 }
 
 export enum ErrCode {
-  E_MBUS_CONNECTION,
-  E_MBUS_SLAVE_READ,
-  E_MBUS_SERIAL_MISMATCH,
+  E_MBUS_CONNECTION = 'E_MBUS_CONNECTION',
+  E_MBUS_SLAVE_READ = 'E_MBUS_SLAVE_READ',
+  E_MBUS_SERIAL_MISMATCH = 'E_MBUS_SERIAL_MISMATCH',
 }
 
 export class MbusError extends Error {
   code: ErrCode
 
-  constructor(code: ErrCode, message: string?) {
+  constructor(code: ErrCode, message?: string) {
     super(message)
     this.code = code
   }
@@ -30,7 +30,7 @@ export type ReadSlaveRecordQuery = {
 
 export type ReadSlaveQuery = {
   primaryAddress: number, 
-  serial: number,
+  serial: string,
   records: ReadSlaveRecordQuery[]
 }
 
@@ -53,14 +53,14 @@ export type ReadSlaveResponse = {
 export class MbusReadout {
 
   private _config
-  private _mbusMaster: typeof MbusMaster
+  private _mbusMaster: MBusMaster
   private _state: State = State.Disconnected
 
   public get state(): State { return this._state }
 
-  constructor(config) {
+  constructor(config: MBusMasterOptions) {
     this._config = config
-    this._mbusMaster = new MbusMaster(config)
+    this._mbusMaster = new MBusMaster(config)
   }
 
   public async connect() {
@@ -116,15 +116,15 @@ export class MbusReadout {
       dataList.push(outAddr)
 
       let rawData: any = undefined
-      let error: MbusError? = undefined
+      let error: MbusError | undefined = undefined
       try {
         rawData = await this.readAddress(q.primaryAddress)
-      } catch (e) {
+      } catch (e: any) {
         error = new MbusError(ErrCode.E_MBUS_CONNECTION, e.message)
       }
 
       if (!error) {
-        if (rawData.SlaveInformation.Id !== q.serial) {
+        if (String(rawData.SlaveInformation.Id) !== q.serial.toString()) {
           error = new MbusError(
             ErrCode.E_MBUS_SERIAL_MISMATCH, 
             `[MBusReader] Primary ${q.primaryAddress}: Meter S/N ${rawData.SlaveInformation.Id} doesn't match S/N ${q.serial} in DB`
@@ -142,7 +142,7 @@ export class MbusReadout {
           continue
         }
 
-        const rec = rawData.DataRecord.find(item => {
+        const rec = rawData.DataRecord.find((item: any) => {
           return item.id === qRec.recordId
         })
         if (!rec) {
@@ -166,6 +166,7 @@ export class MbusReadout {
         }
         outAddr.data.push(outRec)
       }
+    }
 
     return dataList
   }

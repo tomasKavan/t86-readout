@@ -1,6 +1,15 @@
-import { Column, CreateDateColumn, DeleteDateColumn, Entity, ManyToOne, OneToMany, PrimaryColumn, UpdateDateColumn } from "typeorm";
-import { MeasPoint } from "./MeasPoint";
-import { Readout } from "./Readout";
+import { 
+  Column, 
+  CreateDateColumn, 
+  DeleteDateColumn, 
+  Entity, 
+  ManyToOne, 
+  OneToMany, 
+  PrimaryGeneratedColumn, 
+  UpdateDateColumn 
+} from "typeorm"
+import { MeasPoint } from "./MeasPoint"
+import { Readout } from "./Readout"
 
 export enum Type {
   METER_REPLACEMENT = 'metrep'
@@ -8,28 +17,31 @@ export enum Type {
 
 @Entity()
 export class ServiceEvent {
-  @PrimaryColumn()
-  public id: number
+  @PrimaryGeneratedColumn()
+  public id!: number
 
   @Column('enum', { enum: Type })
-  public type: Type
+  public type!: Type
 
-  @Column('datetime', { precision: 0, nullable: true })
+  @Column('datetime', { precision: 0 })
   public occuredUTCTime!: Date
 
-  @ManyToOne(() => MeasPoint, mp => mp.serviceEvents)
-  public measPoint: MeasPoint
+  @ManyToOne(() => MeasPoint, mp => mp.serviceEvents, { 
+    onUpdate: 'CASCADE', 
+    onDelete: 'CASCADE' 
+  })
+  public measPoint!: MeasPoint
 
   @OneToMany(() => Readout, r => r.relatedServiceEvent)
-  public corrections: Readout[]
+  public corrections!: Readout[]
 
-  @Column('text')
-  public comments: String
+  @Column('text', { nullable: true })
+  public comments!: String
 
-  @Column('json')
+  @Column('json', { nullable: true })
   public oldValues: any
 
-  @Column('json')
+  @Column('json', { nullable: true })
   public newValues: any
 
   @CreateDateColumn({ 
@@ -37,7 +49,7 @@ export class ServiceEvent {
     precision: 0,
     default: () => 'CURRENT_TIMESTAMP(0)',
   })
-  public createdUTCTime: Date
+  public createdUTCTime!: Date
 
   @UpdateDateColumn({
     type: 'datetime',
@@ -45,7 +57,7 @@ export class ServiceEvent {
     default: () => 'CURRENT_TIMESTAMP(0)',
     onUpdate: 'CURRENT_TIMESTAMP(0)'
   })
-  public updatedUTCTime: Date
+  public updatedUTCTime!: Date
 
   @DeleteDateColumn({
     type: 'datetime',

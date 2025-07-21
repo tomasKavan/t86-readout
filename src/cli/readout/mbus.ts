@@ -1,15 +1,14 @@
-import path from 'path'
-import fs from 'fs'
-import util from 'util'
+import * as path from 'path'
+import * as fs from 'fs'
+import * as util from 'util'
 import Table = require('cli-table3');
-import * as MbusMasterDef from "node-mbus"
+import MBusMaster from "node-mbus"
 import { config } from 'yargs';
-const MbusMaster = MbusMasterDef.default
 
 export default {
   command: 'mbus',
   describe: 'Fetch values from MBus meters. Using TCP configuration and list of readout addresses.',
-  builder: (yargs) => {
+  builder: (yargs: any) => {
     return yargs
     .option('config', {
       type: 'object',
@@ -59,7 +58,7 @@ type Meter = {
   error?: Error
 }
 
-async function handleReadoutMbus(args) {
+async function handleReadoutMbus(args: any) {
   
 
   let addresses: Meter[] = []
@@ -69,7 +68,7 @@ async function handleReadoutMbus(args) {
     addresses = processArgs(args._.slice(2))
   }
   
-  const mm = new MbusMaster(args.config)
+  const mm = new MBusMaster(args.config)
   mm.connect(async (err) => {
     if (err) {
       throw new Error(`MBusMaster CONNECT error: ${err}`)  
@@ -98,7 +97,7 @@ async function handleReadoutMbus(args) {
           rec.value = d.Value
           rec.info = d
         }
-      } catch (e) {
+      } catch (e: any) {
         addr.error = e.toString()
         console.error(e)
       }
@@ -189,7 +188,7 @@ function processArgs(list: Array<string>, fromFile?: string): Meter[] {
     } 
     addq.records.push({
       id: record,
-      value: null,
+      value: 0,
       info: null
     })
   }
