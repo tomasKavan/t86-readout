@@ -1,14 +1,16 @@
 import 'reflect-metadata'
 
 import config from './config'
-import DbDataSource from './dbDataSource'
-import MbusDataSource from './mbusDataSource'
+import DbDataSource from './dataSources/dbDataSource'
+import MbusDataSource from './dataSources/mbusDataSource'
 import Scheduler from './scheduler'
+import Api from './graphqlServer'
 import { logger } from './logger'
 
 const db = DbDataSource(config.db)
 const mbus = MbusDataSource(config.mbus)
 const scheduler = Scheduler(config.scheduler)
+const api = Api(config.api)
 
 db.initialize()
 .then(async () => {
@@ -21,11 +23,16 @@ db.initialize()
   scheduler.add(async () => {
     await mbus.readout(db)
   })
-  scheduler.enable(true)
-  logger.info(`[index:Readout] Scheduling enabled`)
+  scheduler.enable()
+  logger.info(`[index:Readout] Scheduling enabled (each ${config.scheduler.each / 1000}s). Fire on enable: ${config.scheduler.fireOnEnable ? 'TRUE' : 'FALSE'}`)
+
+  const apiUrl = await api.start(db)
+  logger.info(`[index:API] Api listening on: ${apiUrl}`)
 
 })
-.catch((error) => logger.error(error))
+.catch((error) => {
+  logger.error(error.toString())
+})
 
 process.on('uncaughtException', err => {
   logger.error(`Uncaught exception: ${err.stack || err.message}`)

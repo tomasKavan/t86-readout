@@ -1,8 +1,9 @@
 import { DataSource, IsNull, Not } from "typeorm"
-import { MbusReadout, ReadSlaveQuery, ReadSlaveResponse } from "./MbusReadout"
-import { Metric, Readout } from "./models"
-import { Type as ReadoutType, Source as ReadoutSource } from "./models/Readout"
-import { logger } from "./logger"
+import { MbusReadout, ReadSlaveQuery, ReadSlaveResponse } from "../readout/mbus/MbusReadout"
+import { Metric, Readout } from "../models"
+import { Type as ReadoutType, Source as ReadoutSource } from "../models/Readout"
+import { logger } from "../logger"
+import Big from "big.js"
 
 export type MbusDataSourceConfigOptions = {
   host: string,
@@ -21,7 +22,10 @@ export default function configureMbusDataSource(config: MbusDataSourceConfigOpti
     const metrics = await mrep.find({
       where:{ 
         mbusValueRecordId: Not(IsNull()),
-        autoReadoutEnabled: true
+        autoReadoutEnabled: true,
+        measPoint: {
+          mbusAddr: Not(IsNull())
+        }
       },
       relations: {
         measPoint: true
@@ -36,12 +40,22 @@ export default function configureMbusDataSource(config: MbusDataSourceConfigOpti
     for (const m of metrics) {
       let rsq = list.find(item => item.primaryAddress === m.measPoint.mbusAddr)
       if (!rsq) {
+        if (typeof m.measPoint.mbusAddr !== 'number') {
+          // We know there is number - see where clause of find method above. But to be sure:
+          logger.error(`[MBusReadout] -- Trying to read MeasPoint (ID:${m.measPoint.id}) without M.Bus address.`)
+          continue
+        }
         rsq = {
           primaryAddress: m.measPoint.mbusAddr,
-          serial: m.measPoint.mbusSerial,
+          serial: m.measPoint.mbusSerial || '',
           records: []
         }
         list.push(rsq)
+      }
+      // We know there is number - see where clause of find method above. But to be sure:
+      if (m.mbusValueRecordId === undefined) {
+        logger.error(`[MBusReadout] -- Trying to read Metric (ID:${m.id}) of MeasPoint (ID: ${m.measPoint.id}) without M.Bus record ID.`)
+        continue
       }
       rsq.records.push({
         recordId: m.mbusValueRecordId,
@@ -91,7 +105,7 @@ export default function configureMbusDataSource(config: MbusDataSourceConfigOpti
           // TODO: process error into Readout entry
         } else {
           readout.type = ReadoutType.READOUT
-          readout.value = rec.value ?? 0
+          readout.value = rec.value ?? new Big(0)
         }
         
         readoutList.push(readout)

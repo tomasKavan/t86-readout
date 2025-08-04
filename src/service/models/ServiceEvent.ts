@@ -8,47 +8,63 @@ import {
   PrimaryGeneratedColumn, 
   UpdateDateColumn 
 } from "typeorm"
+import { Field, GraphQLISODateTime, ID, ObjectType, registerEnumType } from "type-graphql"
+
 import { MeasPoint } from "./MeasPoint"
-import { Readout } from "./Readout"
+import { Correction } from "./Correction"
 
 export enum Type {
   METER_REPLACEMENT = 'metrep'
 }
+registerEnumType(Type, {
+  name: 'ServiceEventType',
+  description: 'Type of occured service event. At the moment only meter replacement event is supported.'
+})
 
 @Entity()
+@ObjectType()
 export class ServiceEvent {
   @PrimaryGeneratedColumn()
+  @Field(() => ID)
   public id!: number
 
   @Column('enum', { enum: Type })
+  @Field(() => Type)
   public type!: Type
 
   @Column('datetime', { precision: 0 })
+  @Field(() => GraphQLISODateTime)
   public occuredUTCTime!: Date
 
   @ManyToOne(() => MeasPoint, mp => mp.serviceEvents, { 
     onUpdate: 'CASCADE', 
     onDelete: 'CASCADE' 
   })
+  @Field(() => MeasPoint)
   public measPoint!: MeasPoint
 
-  @OneToMany(() => Readout, r => r.relatedServiceEvent)
-  public corrections!: Readout[]
+  @OneToMany(() => Correction, c => c.serviceEvent)
+  @Field(() => [Correction])
+  public corrections!: Correction[]
+
+  @Column('varchar', { nullable: true })
+  @Field(() => String, { nullable: true })
+  public oldMeterManufacturer?: string
+
+  @Column('varchar', { nullable: true })
+  @Field(() => String, { nullable: true })
+  public oldMeterType?: string
 
   @Column('text', { nullable: true })
-  public comments!: String
-
-  @Column('json', { nullable: true })
-  public oldValues: any
-
-  @Column('json', { nullable: true })
-  public newValues: any
+  @Field(() => String, { nullable: true })
+  public comments?: String
 
   @CreateDateColumn({ 
     type: 'datetime',
     precision: 0,
     default: () => 'CURRENT_TIMESTAMP(0)',
   })
+  @Field(() => GraphQLISODateTime)
   public createdUTCTime!: Date
 
   @UpdateDateColumn({
@@ -57,11 +73,13 @@ export class ServiceEvent {
     default: () => 'CURRENT_TIMESTAMP(0)',
     onUpdate: 'CURRENT_TIMESTAMP(0)'
   })
+  @Field(() => GraphQLISODateTime)
   public updatedUTCTime!: Date
 
   @DeleteDateColumn({
     type: 'datetime',
     precision: 0
   })
-  public deletedUTCTime!: Date
+  @Field(() => GraphQLISODateTime, { nullable: true })
+  public deletedUTCTime?: Date
 }

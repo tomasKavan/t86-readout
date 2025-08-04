@@ -1,5 +1,5 @@
+import Big from "big.js"
 import MBusMaster, { MBusMasterOptions } from "node-mbus"
-import { logger } from "./logger"
 
 enum State {
   Disconnected = 'disconnected',
@@ -38,7 +38,7 @@ export type ReadSlaveRecordData = {
   recordId: number,
   function?: string,
   unit?: string,
-  value?: number,
+  value?: Big,
   originalValue?: number
   timestamp?: Date,
   error?: MbusError
@@ -155,7 +155,8 @@ export class MbusReadout {
           })
           continue
         }
-        const value = rec.Value as number * Math.pow(10, (qRec.decimalShift || 0))
+        const bv = new Big(rec.Value)
+        const value = bv.mul(Math.pow(10, (qRec.decimalShift || 0)))
         const outRec: ReadSlaveRecordData = {
           recordId: rec.id as number,
           function: rec.Function as string,

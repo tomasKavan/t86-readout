@@ -7,59 +7,95 @@ import {
   PrimaryGeneratedColumn, 
   UpdateDateColumn 
 } from "typeorm"
+import { Field, GraphQLISODateTime, ID, ObjectType, registerEnumType } from "type-graphql"
+import Big from 'big.js'
+
 import { Metric } from "./Metric"
 import { ServiceEvent } from "./ServiceEvent"
-import { ErrCode } from "../MbusReadout"
+import { ErrCode } from "../readout/mbus/MbusReadout"
+import { BigScalar } from "../scalars/BigScalar"
 
 export enum Type {
   READOUT = 'rout',
-  CORRECTION = 'corr',
   ERROR = 'err'
 }
+registerEnumType(Type, {
+  name: 'ReadoutType',
+  description: 'Readout entry type. Shows if it\'s a classic row with values or errored row.'
+})
 
 export enum Source {
   MBUS = 'mbus',
   MANUAL = 'man'
 }
+registerEnumType(Source, {
+  name: 'ReadoutSource',
+  description: 'Source of Readout entry. Could be an automatic readout from mbus or manual entry from user.'
+})
+
+registerEnumType(ErrCode, {
+  name: 'MBusReadoutErrCode',
+  description: 'Error codes of automatic readout from M-Bus'
+})
 
 @Entity()
+@ObjectType()
 export class Readout {
   @PrimaryGeneratedColumn()
+  @Field(() => ID)
   public id!: number
 
   @ManyToOne(() => Metric, m => m.readouts)
+  @Field(() => Metric)
   public metric!: Metric
 
   @Column('enum', { enum: Type })
+  @Field(() => Type)
   public type!: Type
 
   @Column('enum', { enum: Source })
+  @Field(() => Source)
   public source!: Source
 
-  @Column('bigint', { default: 0 })
-  public value!: number
+  @Column({ 
+    type: 'decimal',
+    precision: 16,
+    scale: 3,
+    default: 0,
+    transformer: {
+      to: (v: Big) => v.toString(),
+      from: (v: string) => new Big(v)
+    } 
+  })
+  @Field(() => BigScalar)
+  public value!: Big
 
   @Column('enum', { enum: ErrCode, nullable: true })
-  public errCode!: ErrCode
+  @Field(() => ErrCode, { nullable: true })
+  public errCode?: ErrCode
 
   @Column('varchar', { nullable: true })
-  public errDetail!: string
+  @Field(() => String, { nullable: true })
+  public errDetail?: string
 
   @ManyToOne(() => ServiceEvent, se => se.corrections, { 
     nullable: true,
     onUpdate: 'CASCADE',
     onDelete: 'RESTRICT'
   })
+  @Field(() => ServiceEvent)
   public relatedServiceEvent?: ServiceEvent
 
   @Column('datetime', { precision: 0, nullable: true })
-  public meterUTCTimestamp!: Date
+  @Field(() => GraphQLISODateTime, { nullable: true })
+  public meterUTCTimestamp?: Date
 
   @CreateDateColumn({ 
     type: 'datetime',
     precision: 0,
     default: () => 'CURRENT_TIMESTAMP(0)',
   })
+  @Field(() => GraphQLISODateTime)
   public createdUTCTime!: Date
 
   @UpdateDateColumn({
@@ -68,11 +104,13 @@ export class Readout {
     default: () => 'CURRENT_TIMESTAMP(0)',
     onUpdate: 'CURRENT_TIMESTAMP(0)'
   })
+  @Field(() => GraphQLISODateTime)
   public updatedUTCTime!: Date
 
   @DeleteDateColumn({
     type: 'datetime',
     precision: 0
   })
-  public deletedUTCTime!: Date
+  @Field(() => GraphQLISODateTime, { nullable: true })
+  public deletedUTCTime?: Date
 }

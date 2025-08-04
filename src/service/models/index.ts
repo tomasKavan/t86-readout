@@ -1,4 +1,4 @@
-
+import { Correction } from './Correction'
 import { MeasPoint } from './MeasPoint'
 import { Metric } from './Metric'
 import { Readout } from './Readout'
@@ -8,7 +8,8 @@ const modelsArray = [
   MeasPoint,
   Metric,
   Readout,
-  ServiceEvent
+  ServiceEvent,
+  Correction
 ]
 
 export {
@@ -16,5 +17,6 @@ export {
   MeasPoint,
   Metric,
   Readout,
-  ServiceEvent
+  ServiceEvent,
+  Correction
 }

@@ -1,6 +1,6 @@
 import { DataSource, LoggerOptions } from 'typeorm'
-import { modelsArray } from './models/index'
-import { logger } from './logger'
+import { modelsArray } from '../models/index'
+import { logger } from '../logger'
 
 export type DbDataSourceConfigOptions = {
     host: string,
