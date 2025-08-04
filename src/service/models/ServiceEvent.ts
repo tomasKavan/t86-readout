@@ -8,7 +8,7 @@ import {
   PrimaryGeneratedColumn, 
   UpdateDateColumn 
 } from "typeorm"
-import { Field, GraphQLISODateTime, ID, ObjectType, registerEnumType } from "type-graphql"
+import { Field, GraphQLISODateTime, ID, Int, ObjectType, registerEnumType } from "type-graphql"
 
 import { MeasPoint } from "./MeasPoint"
 import { Correction } from "./Correction"
@@ -46,6 +46,14 @@ export class ServiceEvent {
   @OneToMany(() => Correction, c => c.serviceEvent)
   @Field(() => [Correction])
   public corrections!: Correction[]
+
+  @Column('int', { nullable: true })
+  @Field(() => Int, { nullable: true })
+  public oldMbusAddr?: number
+
+  @Column('varchar', { nullable: true })
+  @Field(() => String, { nullable: true })
+  public oldMbusSerial?: string
 
   @Column('varchar', { nullable: true })
   @Field(() => String, { nullable: true })

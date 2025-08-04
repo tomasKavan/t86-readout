@@ -4,7 +4,7 @@ import { GraphQLError } from "graphql"
 
 import { MeasPoint } from "../models"
 import { ApiContext } from "../graphqlServer"
-import { AddMeasPoint, UpdateMeasPoint } from "../types/MeasPointTypes"
+import { AddMeasPoint, ChangeMeter, UpdateMeasPoint } from "../types/MeasPointTypes"
 import { updateDefined } from "../utils/objectProc"
 
 @Resolver(() => MeasPoint)
@@ -12,7 +12,7 @@ export class MeasPointResolver {
   @Query(() => [MeasPoint])
   async measPoints(@Ctx() ctx: ApiContext): Promise<MeasPoint[]> {
     const mps = await ctx.ds.getRepository(MeasPoint).find({
-      relations: ['metrics']
+      relations: ['metrics', 'serviceEvents']
     })
     
     return mps
@@ -75,5 +75,14 @@ export class MeasPointResolver {
         })
       }
     })
+  }
+
+  @Mutation(() => MeasPoint)
+  async changeMeter(
+    @Arg('id', () => ID) id: string,
+    @Arg('data') data: ChangeMeter,
+    @Ctx() ctx: ApiContext
+  ): Promise<MeasPoint> {
+    throw new Error('Not implemented')
   }
 }

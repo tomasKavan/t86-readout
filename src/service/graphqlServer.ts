@@ -4,6 +4,9 @@ import { ApolloServer } from "@apollo/server"
 import { startStandaloneServer } from '@apollo/server/standalone'
 
 import { MeasPointResolver } from "./resolvers/MeasPointResolver"
+import { MetricResolver } from "./resolvers/MetricResolver"
+import { SerieResolver } from "./resolvers/SerieResolver"
+import { ServiceEventResolver } from "./resolvers/ServiceEventResolver"
 
 
 export type ApiConfigOptions = {
@@ -19,7 +22,10 @@ export default function configureApi (config: ApiConfigOptions) {
     start: async (ds: DataSource) => {
       const schema = await buildSchema({
         resolvers: [
-          MeasPointResolver
+          MeasPointResolver,
+          MetricResolver,
+          SerieResolver,
+          ServiceEventResolver
         ]
       })
 
@@ -30,7 +36,7 @@ export default function configureApi (config: ApiConfigOptions) {
         },
         listen: { port: config.port }
       })
-      
+
       return url
     }
   }

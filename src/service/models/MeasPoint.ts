@@ -7,7 +7,7 @@ import {
   PrimaryColumn, 
   UpdateDateColumn 
 } from "typeorm"
-import { Field, GraphQLISODateTime, ID, ObjectType, registerEnumType } from "type-graphql"
+import { Field, GraphQLISODateTime, ID, Int, ObjectType, registerEnumType } from "type-graphql"
 
 import { Metric } from "./Metric"
 import { ServiceEvent } from "./ServiceEvent"
@@ -55,7 +55,7 @@ export class MeasPoint {
   public subjectSpec?: SubjectSpec
 
   @Column('smallint', { nullable: true })
-  @Field(() => Number, { nullable: true })
+  @Field(() => Int, { nullable: true })
   public mbusAddr?: number
 
   @Column('varchar', { nullable: true })
