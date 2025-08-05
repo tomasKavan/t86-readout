@@ -65,35 +65,44 @@ export class ChangeMeterCorrection {
   metricId!: number
 
   @Field(() => BigScalar)
-  value!: Big
+  value?: Big
 
   @Field(() => BigScalar, { nullable: true })
-  oldMeterEndValue?: Big
+  oldMeterEndValue?: Big | null
 
   @Field(() => BigScalar, { nullable: true })
-  newMeterStartValue?: Big
+  newMeterStartValue?: Big | null
+
+  @Field(() => Boolean)
+  hasPhysicalDisplay?: boolean
+
+  @Field(() => Int, { nullable: true })
+  mbusValueRecordId?: number | null
+
+  @Field(() => Int, { nullable: true })
+  mbusDecimalShift?: number | null
 
 }
 
 @InputType()
 export class ChangeMeter {
+  @Field(() => GraphQLISODateTime)
+  occuredUTCTime!: Date
+
   @Field(() => Int, { nullable: true })
-  mbusAddr?: number
+  mbusAddr?: number | null
 
   @Field(() => String, { nullable: true })
-  mbusSerial?: string
+  mbusSerial?: string | null
 
   @Field(() => String)
   meterManufacturer!: string
 
   @Field(() => String)
-  meterType?: string
+  meterType!: string
 
   @Field(() => String, { nullable: true })
-  comments?: String
-
-  @Field(() => GraphQLISODateTime)
-  occuredUTCTime!: Date
+  comments?: string | null
 
   @Field(() => [ChangeMeterCorrection])
   corrections: ChangeMeterCorrection[] = []

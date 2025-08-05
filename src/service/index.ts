@@ -26,7 +26,7 @@ db.initialize()
   scheduler.enable()
   logger.info(`[index:Readout] Scheduling enabled (each ${config.scheduler.each / 1000}s). Fire on enable: ${config.scheduler.fireOnEnable ? 'TRUE' : 'FALSE'}`)
 
-  const apiUrl = await api.start(db)
+  const apiUrl = await api.start(db, scheduler)
   logger.info(`[index:API] Api listening on: ${apiUrl}`)
 
 })

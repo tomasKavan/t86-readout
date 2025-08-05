@@ -22,7 +22,6 @@ export default function configureMbusDataSource(config: MbusDataSourceConfigOpti
     const metrics = await mrep.find({
       where:{ 
         mbusValueRecordId: Not(IsNull()),
-        autoReadoutEnabled: true,
         measPoint: {
           mbusAddr: Not(IsNull())
         }
@@ -38,6 +37,9 @@ export default function configureMbusDataSource(config: MbusDataSourceConfigOpti
     const list: ReadSlaveQuery[] = []
 
     for (const m of metrics) {
+      // Skip if aut readout is not enabled for Measurement Point
+      if (!m.measPoint.autoReadoutEnabled) continue
+
       let rsq = list.find(item => item.primaryAddress === m.measPoint.mbusAddr)
       if (!rsq) {
         if (typeof m.measPoint.mbusAddr !== 'number') {
@@ -53,13 +55,13 @@ export default function configureMbusDataSource(config: MbusDataSourceConfigOpti
         list.push(rsq)
       }
       // We know there is number - see where clause of find method above. But to be sure:
-      if (m.mbusValueRecordId === undefined) {
+      if (m.mbusValueRecordId === undefined || m.mbusValueRecordId === null) {
         logger.error(`[MBusReadout] -- Trying to read Metric (ID:${m.id}) of MeasPoint (ID: ${m.measPoint.id}) without M.Bus record ID.`)
         continue
       }
       rsq.records.push({
         recordId: m.mbusValueRecordId,
-        decimalShift: m.mbusDecimalShift
+        decimalShift: m.mbusDecimalShift ?? 0
       })
     }
 

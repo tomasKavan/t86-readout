@@ -1,4 +1,5 @@
 import { Arg, Ctx, Query, Resolver } from 'type-graphql'
+
 import { Serie } from '../models/Serie'
 import { QuerySerie } from '../types/SerieTypes'
 import { ApiContext } from '../graphqlServer'

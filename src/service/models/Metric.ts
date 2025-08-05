@@ -54,17 +54,13 @@ export class Metric {
   @Field(() => Boolean)
   public hasPhysicalDisplay!: boolean
 
-  @Column('boolean', { default: false })
-  @Field(() => Boolean)
-  public autoReadoutEnabled!: boolean
+  @Column('int', { nullable: true })
+  @Field(() => Int, { nullable: true })
+  public mbusValueRecordId?: number | null
 
   @Column('int', { nullable: true })
-  @Field(() => Int)
-  public mbusValueRecordId?: number
-
-  @Column('int', { nullable: true })
-  @Field(() => Int)
-  public mbusDecimalShift?: number
+  @Field(() => Int, { nullable: true })
+  public mbusDecimalShift?: number | null
 
   @OneToMany(() => Readout, r => r.metric)
   @Field(() => [Readout])

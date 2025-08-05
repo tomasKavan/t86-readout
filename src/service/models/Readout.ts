@@ -78,14 +78,6 @@ export class Readout {
   @Field(() => String, { nullable: true })
   public errDetail?: string
 
-  @ManyToOne(() => ServiceEvent, se => se.corrections, { 
-    nullable: true,
-    onUpdate: 'CASCADE',
-    onDelete: 'RESTRICT'
-  })
-  @Field(() => ServiceEvent)
-  public relatedServiceEvent?: ServiceEvent
-
   @Column('datetime', { precision: 0, nullable: true })
   @Field(() => GraphQLISODateTime, { nullable: true })
   public meterUTCTimestamp?: Date

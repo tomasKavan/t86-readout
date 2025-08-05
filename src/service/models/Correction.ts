@@ -7,7 +7,7 @@ import {
   UpdateDateColumn, 
   DeleteDateColumn 
 } from "typeorm"
-import { Field, GraphQLISODateTime, ID, ObjectType } from "type-graphql"
+import { Field, GraphQLISODateTime, ID, Int, ObjectType } from "type-graphql"
 import Big from "big.js"
 
 import { ServiceEvent } from "./ServiceEvent"
@@ -59,7 +59,7 @@ export class Correction {
     } 
   })
   @Field(() => BigScalar, { nullable: true })
-  public oldMeterEndValue?: Big
+  public oldMeterEndValue?: Big | null
 
   @Column({ 
     type: 'decimal',
@@ -72,7 +72,19 @@ export class Correction {
     } 
   })
   @Field(() => BigScalar, { nullable: true })
-  public newMeterStartValue?: Big
+  public newMeterStartValue?: Big | null
+
+  @Column('boolean', { nullable: true })
+  @Field(() => Boolean, { nullable: true })
+  public oldMeterHasPhysicalDisplay?: boolean | null
+
+  @Column('int', { nullable: true })
+  @Field(() => Int, { nullable: true })
+  public oldMeterMbusValueRecordId?: number | null
+
+  @Column('int', { nullable: true })
+  @Field(() => Int, { nullable: true })
+  public oldMeterMbusDecimalShift?: number | null
 
   @CreateDateColumn({ 
     type: 'datetime',
@@ -96,5 +108,5 @@ export class Correction {
     precision: 0
   })
   @Field(() => GraphQLISODateTime, { nullable: true })
-  public deletedUTCTime?: Date
+  public deletedUTCTime?: Date | null
 }

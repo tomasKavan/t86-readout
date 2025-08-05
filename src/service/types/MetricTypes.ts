@@ -24,7 +24,7 @@ export class AddMetric implements Partial<Metric> {
 }
 
 @ArgsType()
-class GetWithReadings {
+export class GetWithReadings {
   @Field(() => GraphQLISODateTime, { nullable: true })
   readingsFromUTC?: Date
 
@@ -36,9 +36,6 @@ class GetWithReadings {
 export class GetMetric extends GetWithReadings {
   @Field(() => ID)
   id!: number
-
-  @Field(() => [Subject], { nullable: true })
-  subjects?: Subject[]
 }
 
 @ArgsType()
@@ -48,19 +45,4 @@ export class GetMetrics extends GetWithReadings {
 
   @Field(() => [Subject], { nullable: true })
   subjects?: Subject[]
-}
-
-@ArgsType()
-export class SetAutoReadout {
-  @Field(() => Int, { nullable: true })
-  id?: number
-
-  @Field(() => [String], { nullable: true })
-  measPointIds?: string[]
-
-  @Field(() => [Subject], { nullable: true })
-  subjects?: Subject[]
-
-  @Field(() => Boolean, { nullable: true })
-  all?: boolean
 }

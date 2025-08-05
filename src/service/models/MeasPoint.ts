@@ -52,23 +52,27 @@ export class MeasPoint {
 
   @Column('enum', { enum: SubjectSpec, nullable: true })
   @Field(() => SubjectSpec, { nullable: true })
-  public subjectSpec?: SubjectSpec
+  public subjectSpec?: SubjectSpec | null
 
   @Column('smallint', { nullable: true })
   @Field(() => Int, { nullable: true })
-  public mbusAddr?: number
+  public mbusAddr?: number | null
 
   @Column('varchar', { nullable: true })
   @Field(() => String, { nullable: true })
-  public mbusSerial?: string
+  public mbusSerial?: string | null
 
   @Column('varchar', { nullable: true })
   @Field(() => String, { nullable: true })
-  public meterManufacturer?: string
+  public meterManufacturer?: string | null
 
   @Column('varchar', { nullable: true })
   @Field(() => String, { nullable: true })
-  public meterType?: string
+  public meterType?: string | null
+
+  @Column('boolean', { default: false })
+  @Field(() => Boolean)
+  public autoReadoutEnabled!: boolean
 
   @OneToMany(() => Metric, m => m.measPoint)
   @Field(() => [Metric])
@@ -100,6 +104,6 @@ export class MeasPoint {
     precision: 0
   })
   @Field(() => GraphQLISODateTime, { nullable: true })
-  public deletedUTCTime?: Date
+  public deletedUTCTime?: Date | null
 
 }
