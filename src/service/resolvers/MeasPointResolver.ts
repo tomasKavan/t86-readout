@@ -396,6 +396,14 @@ export class MeasPointResolver {
     return mp
   }
 
+  /**
+   * 
+   * Disable auto readout of Measurement Point
+   * 
+   * @param id - ID of Measurement Point which autoReadout status should be changed 
+   * @param ctx - GraphQL Server context (passed by Apollo server)
+   * @returns Instance of Measurement Point with autoReadout attribute adjusted 
+   */
   @Mutation(() => MeasPoint)
   async disableMetricAutoReadout(
     @Arg('id', () => ID) id: string,
@@ -417,7 +425,6 @@ export class MeasPointResolver {
 
     return mp
   }
-
 
   /**
    * 

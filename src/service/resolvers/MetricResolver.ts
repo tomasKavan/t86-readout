@@ -6,8 +6,24 @@ import { And, EntityManager, FindOperator, FindOptionsWhere, In, LessThanOrEqual
 import { ApolloServerErrorCode } from "@apollo/server/errors";
 import { GraphQLError } from "graphql";
 
+/**
+ * Resolver for Metrics
+ */
 @Resolver(() => Metric)
 export class MetricResolver {
+
+  /**
+   * Returns list of Metrics 
+   * 
+   * Filter by passing params arguments. See {@link GetMetrics} for more info about types.
+   * By attributes `readingsFromUTC` and `readingsToUTC` it's possible to limit an era from which 
+   * readouts will be avalable in response. If both params are not present no readouts are 
+   * included.
+   * 
+   * @param params - Filter list by passing params
+   * @param ctx - GraphQL Server context (passed by Apollo server)
+   * @returns List of Metrics
+   */
   @Query(() => [Metric])
   async metrics(
     @Args() params: GetMetrics,
