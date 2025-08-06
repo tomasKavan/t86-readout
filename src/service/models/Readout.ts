@@ -45,7 +45,10 @@ export class Readout {
   @Field(() => ID)
   public id!: number
 
-  @ManyToOne(() => Metric, m => m.readouts)
+  @ManyToOne(() => Metric, m => m.readouts, {
+    nullable: false,
+    onDelete: 'CASCADE'
+  })
   @Field(() => Metric)
   public metric!: Metric
 
@@ -64,7 +67,7 @@ export class Readout {
     default: 0,
     transformer: {
       to: (v: Big) => v.toString(),
-      from: (v: string) => new Big(v)
+      from: (v: string) => v === null ? null : new Big(v)
     } 
   })
   @Field(() => BigScalar)
@@ -103,6 +106,5 @@ export class Readout {
     type: 'datetime',
     precision: 0
   })
-  @Field(() => GraphQLISODateTime, { nullable: true })
   public deletedUTCTime?: Date
 }

@@ -105,7 +105,7 @@ export class MbusReadout {
     })
   }
 
-  public async readInputs(list: Array<ReadSlaveQuery> ): Promise<ReadSlaveResponse[]> {
+  public async readInputs(list: Array<ReadSlaveQuery>, checkSerials: boolean = true): Promise<ReadSlaveResponse[]> {
     const dataList: ReadSlaveResponse[] = []
 
     for (const q of list) {
@@ -123,7 +123,7 @@ export class MbusReadout {
         error = new MbusError(ErrCode.E_MBUS_CONNECTION, e.message)
       }
 
-      if (!error) {
+      if (!error && checkSerials) {
         if (String(rawData.SlaveInformation.Id) !== q.serial.toString()) {
           error = new MbusError(
             ErrCode.E_MBUS_SERIAL_MISMATCH, 

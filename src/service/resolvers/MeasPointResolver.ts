@@ -11,6 +11,7 @@ import { Func } from "../models/MetricEnums"
 import Big from "big.js"
 import { MoreThanOrEqual } from "typeorm"
 import { Type } from "../models/ServiceEvent"
+import { logger } from "../logger"
 
 /**
  * Resolver for Measurement Points
@@ -89,6 +90,9 @@ export class MeasPointResolver {
 
       const mp = mprep.create(data)
 
+      logger.info(`[MeasPointResolver] ID ${mp.id} Added with ${mp.metrics.length} metrics.`)
+      logger.debug(`[MeasPointResolver] -- added data: ${data}`)
+
       await mprep.save(mp)
       return mp
     })
@@ -119,6 +123,10 @@ export class MeasPointResolver {
         const mp = await mprep.findOneByOrFail({ id: id })
         updateDefined(mp, data)
         await mprep.save(mp)
+
+        logger.info(`[MeasPointResolver] ID ${id} Updated`)
+        logger.debug(`[MeasPointResolver] -- changed data: ${data}`)
+
         return mp
       } catch (e) {
         throw new GraphQLError(`MeasPoint with the id [${id}] not found`, {
@@ -177,13 +185,16 @@ export class MeasPointResolver {
    */
   @Mutation(() => MeasPoint)
   async changeMeter(
-    @Arg('id', () => ID) id: string,
+    @Arg('id', () => ID, { description: 'MeasPoint ID'}) id: string,
     @Arg('data') data: ChangeMeter,
     @Arg('force', { defaultValue: false }) force: boolean,
     @Ctx() ctx: ApiContext
   ): Promise<MeasPoint> {
     return await ctx.ds.transaction(async trn => {
-      const mp = await trn.getRepository(MeasPoint).findOne({ 
+      const mprep = trn.getRepository(MeasPoint)
+      const serep = trn.getRepository(ServiceEvent)
+
+      const mp = await mprep.findOne({ 
         where : { id },
         relations: ['metrics', 'serviceEvents']
       })
@@ -196,7 +207,7 @@ export class MeasPointResolver {
 
       // Check if occuredUTCTime is younger than last ServiceEvent
       for (const se of mp.serviceEvents) {
-        if (se.occuredUTCTime.getTime() > data.occuredUTCTime.getTime()) {
+        if (Math.round(se.occuredUTCTime.getTime()) / 1000 >= Math.round(data.occuredUTCTime.getTime() / 1000)) {
           throw new GraphQLError(`There is younger Service Event (ID: ${se.id}) than ${data.occuredUTCTime}. Meter change request is thus invalid.`, {
             extensions: { code: ApolloServerErrorCode.BAD_USER_INPUT }
           })
@@ -255,7 +266,7 @@ export class MeasPointResolver {
 
       // Create Service Event object and fill it
       const se: Partial<ServiceEvent> = {}
-      se.measPoint = mp
+      se.measPoint = { id: mp.id } as MeasPoint
       se.type = Type.METER_REPLACEMENT
       se.corrections = corrs as Correction[]
 
@@ -272,20 +283,37 @@ export class MeasPointResolver {
 
       // Map some keys from Input to MeasPoint 
       // keep MesPoint as defaults if attribute not present
-      mapKeysShallow(['mbusAddr', 'mbusSerial', 'meterManufacturer', 'meterType'], mp, data, mp)
+      const ump = mprep.create()
+      mapKeysShallow(['id', 'mbusAddr', 'mbusSerial', 'meterManufacturer', 'meterType'], ump, data, mp)
 
       // All ready - Let's save it
-      await trn.save(se)
-      await trn.save(mp)
+      await serep.save(se)
+      await mprep.save(ump)
 
+      let rcount = 0
       if (rots.length) {
-        const rep = await trn.getRepository(Readout)
-        await rep.softDelete({ 
+        const rep = trn.getRepository(Readout)
+        const res = await rep.softDelete({ 
           meterUTCTimestamp: MoreThanOrEqual(data.occuredUTCTime)
         })
+        rcount = res.affected || 0
       }
 
-      return mp
+      const respmp = await mprep.findOne({ 
+        where : { id },
+        relations: [
+          'metrics', 
+          'serviceEvents', 
+          'serviceEvents.corrections', 
+          'serviceEvents.corrections.metric'
+        ]
+      })
+      
+      logger.info(`[MeasPointResolver] ID ${se.measPoint.id} - Added Service Event - Meter Change`)
+      logger.debug(`[MeasPointResolver] -- added ${se.corrections.length} corrections`)
+      logger.debug(`[MeasPointResolver] -- soft remove of readouts younger than ${se.occuredUTCTime}, count ${rcount}`)
+
+      return respmp as MeasPoint
     })
     
   }
@@ -314,15 +342,15 @@ export class MeasPointResolver {
    */
   @Mutation(() => MeasPoint)
   async revertMeterChange(
-    @Arg('id', () => ID) id: string,
-    @Arg('serviceEventId', () => ID) serviceEventId: number,
+    @Arg('measPointId', () => ID) id: string,
+    @Arg('serviceEventId', () => ID) serviceEventId: number | string,
     @Arg('force', { defaultValue: false }) force: boolean,
     @Ctx() ctx: ApiContext
   ): Promise<MeasPoint> {
     return await ctx.ds.transaction(async trn => {
       const mp = await trn.getRepository(MeasPoint).findOne({
         where: { id: id },
-        relations: ['serviceEvents', 'metrics']
+        relations: ['serviceEvents', 'metrics', 'serviceEvents.corrections']
       })
 
       if (!mp) {
@@ -331,15 +359,15 @@ export class MeasPointResolver {
         })
       }
 
-      const se = mp.serviceEvents.find(mpse => mpse.id === serviceEventId)
+      const se = mp.serviceEvents.find(mpse => String(mpse.id) === String(serviceEventId))
       if (!se) {
-        throw new GraphQLError(`ServiceEvent with ID ${serviceEventId} on MeasPoint (ID${id}) not found.`, {
+        throw new GraphQLError(`ServiceEvent with ID ${serviceEventId} on MeasPoint (ID ${id}) not found.`, {
           extensions: { code: ApolloServerErrorCode.BAD_USER_INPUT }
         })
       }
 
       if (mp.serviceEvents.find(mpse => mpse.occuredUTCTime.getTime() > se.occuredUTCTime.getTime())) {
-        throw new GraphQLError(`ServiceEvent with ID ${serviceEventId} on MeasPoint (ID${id}) is not the younest one.`, {
+        throw new GraphQLError(`ServiceEvent with ID ${serviceEventId} on MeasPoint (ID ${id}) is not the younest one.`, {
           extensions: { code: ApolloServerErrorCode.BAD_USER_INPUT }
         })
       }
@@ -356,9 +384,13 @@ export class MeasPointResolver {
       // Soft remove doesn't cascade we need to remove all respective children
       await trn.getRepository(ServiceEvent).softRemove(se)
       await trn.getRepository(Correction).softRemove(se.corrections)
-      await trn.getRepository(Readout).softDelete({
+      const res = await trn.getRepository(Readout).softDelete({
         meterUTCTimestamp: MoreThanOrEqual(se.occuredUTCTime)
       })
+
+      logger.info(`[MeasPointResolver] ID ${se.measPoint.id} - Reverted Service Event ID ${se.id}.`)
+      logger.debug(`[MeasPointResolver] -- soft remove of ${se.corrections.length} corrections`)
+      logger.debug(`[MeasPointResolver] -- soft remove of readouts younger than ${se.occuredUTCTime}, count ${res.affected}`)
 
       // Remove deleted Service Event from MeasPoint
       mp.serviceEvents.splice(mp.serviceEvents.indexOf(se), 1)

@@ -4,6 +4,8 @@ import { Metric } from './Metric'
 import { Readout } from './Readout'
 import { ServiceEvent } from './ServiceEvent'
 import { SerieEntry } from './SerieEntry'
+import { MBusSlave } from './MBusSlave'
+import { MBusRecord } from './MBusRecord'
 
 const modelsArray = [
   MeasPoint,
@@ -22,5 +24,7 @@ export {
   ServiceEvent,
   Correction,
 
-  SerieEntry
+  SerieEntry,
+  MBusSlave,
+  MBusRecord
 }

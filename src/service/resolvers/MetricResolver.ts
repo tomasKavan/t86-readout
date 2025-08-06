@@ -56,6 +56,17 @@ export class MetricResolver {
     })
   }
 
+  /**
+   * Returns a Metric instance
+   * 
+   * By attributes `readingsFromUTC` and `readingsToUTC` it's possible to limit an era from which 
+   * readouts will be avalable in response. If both params are not present no readouts are 
+   * included.
+   * 
+   * @param params - id of requested metric and params influencing what readouts are loaded
+   * @param ctx - GraphQL Server context (passed by Apollo server)
+   * @returns Instance of Metric
+   */
   @Query(() => Metric)
   async metric(
     @Args() params: GetMetric,
@@ -80,6 +91,14 @@ export class MetricResolver {
     })
   }
 
+  /**
+   * Add new instance of Metric to a Measurement Point
+   * 
+   * @param measPointId - id of Measurement Point to which the Metric should be added
+   * @param data - new Metric's data.
+   * @param ctx - GraphQL Server context (passed by Apollo server)
+   * @returns Newly created instance of Metric
+   */
   @Mutation(() => Metric)
   async addMetric(
     @Arg('measPointId', () => ID) measPointId: string,
@@ -104,6 +123,17 @@ export class MetricResolver {
     })
   }
 
+  /**
+   * Delete an Instance of Metric
+   * 
+   * Identified by id. If Metric already contains any readouts the `force` flag must be set.
+   * Otherwise the deletion fails.
+   * 
+   * @param id - ID of Metric to delete.
+   * @param force - Force delete even if Metric has some Readouts
+   * @param ctx - GraphQL Server context (passed by Apollo server)
+   * @returns 
+   */
   @Mutation(() => Boolean)
   async deleteMetric(
     @Arg('id', () => ID) id: number,
@@ -142,6 +172,15 @@ export class MetricResolver {
     })
   }
 
+  /**
+   * Helper function to construct readout "where" filter and query DB with it.
+   * 
+   * Used by queries `metric` and `metrics`.
+   *  
+   * @param params - Time bounds of requested era.
+   * @param trn - Entity manager (transaction) on which the DB query should be executed
+   * @returns List of requested readouts
+   */
   async filterReadouts(
     params: GetWithReadings, 
     trn: EntityManager

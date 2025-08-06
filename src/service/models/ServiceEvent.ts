@@ -37,13 +37,16 @@ export class ServiceEvent {
   public occuredUTCTime!: Date
 
   @ManyToOne(() => MeasPoint, mp => mp.serviceEvents, { 
+    nullable: false,
     onUpdate: 'CASCADE', 
     onDelete: 'CASCADE' 
   })
   @Field(() => MeasPoint)
   public measPoint!: MeasPoint
 
-  @OneToMany(() => Correction, c => c.serviceEvent)
+  @OneToMany(() => Correction, c => c.serviceEvent, {
+    cascade: true
+  })
   @Field(() => [Correction])
   public corrections!: Correction[]
 
@@ -88,6 +91,5 @@ export class ServiceEvent {
     type: 'datetime',
     precision: 0
   })
-  @Field(() => GraphQLISODateTime, { nullable: true })
   public deletedUTCTime?: Date
 }

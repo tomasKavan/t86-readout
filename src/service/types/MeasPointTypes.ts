@@ -16,46 +16,49 @@ export class AddMeasPoint {
   @Field()
   roomNo!: string
 
-  @Field()
-  instDetails: string = ''
+  @Field(() => String, { nullable: true })
+  instDetails?: string = ''
 
-  @Field()
+  @Field(() => String, { nullable: true })
   notes: string = ''
 
-  @Field()
+  @Field(() => Subject)
   subject!: Subject
 
-  @Field()
-  subjectSpec?: SubjectSpec
+  @Field(() => SubjectSpec, { nullable: true })
+  subjectSpec?: SubjectSpec | null = null
 
-  @Field()
-  mbusAddr?: number
+  @Field(() => Int, { nullable: true })
+  mbusAddr?: number | null = null
 
-  @Field()
-  mbusSerial?: string
+  @Field(() => String, { nullable: true })
+  mbusSerial?: string | null = null
 
-  @Field()
-  meterManufacturer?: string
+  @Field(() => String, { nullable: true })
+  meterManufacturer?: string | null = null
 
-  @Field()
-  meterType?: string
+  @Field(() => String, { nullable: true })
+  meterType?: string | null = null
 
-  @Field(() => AddMetric)
+  @Field(() => Boolean)
+  autoReadoutEnabled: boolean = false
+
+  @Field(() => [AddMetric], { nullable: true })
   metrics: AddMetric[] = []
 }
 
 @InputType()
 export class UpdateMeasPoint {
-  @Field()
+  @Field(() => String, { nullable: true })
   name?: string
 
-  @Field()
+  @Field(() => String, { nullable: true })
   roomNo?: string
 
-  @Field()
+  @Field(() => String, { nullable: true })
   instDetails?: string
 
-  @Field()
+  @Field(() => String, { nullable: true })
   notes?: string
 }
 
@@ -64,8 +67,8 @@ export class ChangeMeterCorrection {
   @Field()
   metricId!: number
 
-  @Field(() => BigScalar)
-  value?: Big
+  @Field(() => BigScalar, { nullable: true })
+  value: Big = new Big(0)
 
   @Field(() => BigScalar, { nullable: true })
   oldMeterEndValue?: Big | null
@@ -73,7 +76,7 @@ export class ChangeMeterCorrection {
   @Field(() => BigScalar, { nullable: true })
   newMeterStartValue?: Big | null
 
-  @Field(() => Boolean)
+  @Field(() => Boolean, { nullable: true })
   hasPhysicalDisplay?: boolean
 
   @Field(() => Int, { nullable: true })
@@ -95,11 +98,11 @@ export class ChangeMeter {
   @Field(() => String, { nullable: true })
   mbusSerial?: string | null
 
-  @Field(() => String)
-  meterManufacturer!: string
+  @Field(() => String, { nullable: true })
+  meterManufacturer?: string
 
-  @Field(() => String)
-  meterType!: string
+  @Field(() => String, { nullable: true })
+  meterType?: string
 
   @Field(() => String, { nullable: true })
   comments?: string | null

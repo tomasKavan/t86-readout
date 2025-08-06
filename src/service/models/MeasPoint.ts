@@ -39,7 +39,7 @@ export class MeasPoint {
   public roomNo!: string
 
   @Column('varchar', { default: '' })
-  @Field(() => String)
+  @Field(() => String, { defaultValue: ''})
   public instDetails!: string
 
   @Column('varchar', { default: '' })
@@ -74,7 +74,9 @@ export class MeasPoint {
   @Field(() => Boolean)
   public autoReadoutEnabled!: boolean
 
-  @OneToMany(() => Metric, m => m.measPoint)
+  @OneToMany(() => Metric, m => m.measPoint, {
+    cascade: ['insert', 'update']
+  })
   @Field(() => [Metric])
   public metrics!: Metric[] 
 
@@ -103,7 +105,5 @@ export class MeasPoint {
     type: 'datetime',
     precision: 0
   })
-  @Field(() => GraphQLISODateTime, { nullable: true })
   public deletedUTCTime?: Date | null
-
 }

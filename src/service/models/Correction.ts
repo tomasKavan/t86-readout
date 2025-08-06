@@ -6,13 +6,13 @@ import {
   CreateDateColumn, 
   UpdateDateColumn, 
   DeleteDateColumn 
-} from "typeorm"
-import { Field, GraphQLISODateTime, ID, Int, ObjectType } from "type-graphql"
-import Big from "big.js"
+} from 'typeorm'
+import { Field, GraphQLISODateTime, ID, Int, ObjectType } from 'type-graphql'
+import Big from 'big.js'
 
-import { ServiceEvent } from "./ServiceEvent"
-import { Metric } from "./Metric"
-import { BigScalar } from "../scalars/BigScalar"
+import { ServiceEvent } from './ServiceEvent'
+import { Metric } from './Metric'
+import { BigScalar } from '../scalars/BigScalar'
 
 @Entity()
 @ObjectType()
@@ -23,14 +23,16 @@ export class Correction {
 
   @ManyToOne(() => ServiceEvent, s => s.corrections, {
     onUpdate: 'CASCADE',
-    onDelete: 'RESTRICT'
+    onDelete: 'CASCADE',
+    nullable: false
   })
   @Field(() => ServiceEvent)
   public serviceEvent!: ServiceEvent
 
   @ManyToOne(() => Metric, m => m.corrections, {
     onUpdate: 'CASCADE',
-    onDelete: 'CASCADE'
+    onDelete: 'CASCADE',
+    nullable: false
   })
   @Field(() => Metric)
   public metric!: Metric
@@ -42,7 +44,7 @@ export class Correction {
     default: 0,
     transformer: {
       to: (v: Big) => v.toString(),
-      from: (v: string) => new Big(v)
+      from: (v: string) => v === null ? null : new Big(v) 
     } 
   })
   @Field(() => BigScalar)
@@ -55,7 +57,7 @@ export class Correction {
     nullable: true,
     transformer: {
       to: (v: Big) => v.toString(),
-      from: (v: string) => new Big(v)
+      from: (v: string) => v === null ? null : new Big(v)
     } 
   })
   @Field(() => BigScalar, { nullable: true })
@@ -68,7 +70,7 @@ export class Correction {
     nullable: true,
     transformer: {
       to: (v: Big) => v.toString(),
-      from: (v: string) => new Big(v)
+      from: (v: string) => v === null ? null : new Big(v)
     } 
   })
   @Field(() => BigScalar, { nullable: true })
@@ -107,6 +109,5 @@ export class Correction {
     type: 'datetime',
     precision: 0
   })
-  @Field(() => GraphQLISODateTime, { nullable: true })
   public deletedUTCTime?: Date | null
 }

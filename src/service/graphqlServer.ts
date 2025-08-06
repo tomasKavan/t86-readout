@@ -9,6 +9,8 @@ import { SerieResolver } from "./resolvers/SerieResolver"
 import { ReadoutResolver } from "./resolvers/ReadoutResolver"
 import { Scheduler } from "./scheduler"
 import { SchedulerResolver } from "./resolvers/SchedulerResolver"
+import { MbusReadout } from "./readout/mbus/MbusReadout"
+import { MBusQueryResolver } from "./resolvers/QueryMBusResolver"
 
 
 export type ApiConfigOptions = {
@@ -17,26 +19,28 @@ export type ApiConfigOptions = {
 
 export interface ApiContext {
   ds: DataSource,
-  sch: Scheduler
+  sch: Scheduler,
+  mbus: MbusReadout
 }
 
 export default function configureApi (config: ApiConfigOptions) {
   return {
-    start: async (ds: DataSource, sch: Scheduler) => {
+    start: async (ds: DataSource, sch: Scheduler, mbus: MbusReadout) => {
       const schema = await buildSchema({
         resolvers: [
           MeasPointResolver,
           MetricResolver,
           ReadoutResolver,
           SerieResolver,
-          SchedulerResolver
+          SchedulerResolver,
+          MBusQueryResolver
         ]
       })
 
       const server = new ApolloServer<ApiContext>({ schema })
       const { url } = await startStandaloneServer(server, {
         context: async ({ req }) => {
-          return { ds: ds, sch: sch }
+          return { ds: ds, sch: sch, mbus: mbus }
         },
         listen: { port: config.port }
       })

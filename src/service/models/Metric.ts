@@ -37,7 +37,7 @@ export class Metric {
   @ManyToOne(() => MeasPoint, mp => mp.metrics, {
     onUpdate: 'CASCADE',
     onDelete: 'RESTRICT',
-    cascade: ['insert', 'update']
+    nullable: false
   })
   @Field(() => MeasPoint)
   public measPoint!: MeasPoint
@@ -91,6 +91,5 @@ export class Metric {
     type: 'datetime',
     precision: 0
   })
-  @Field(() => GraphQLISODateTime, { nullable: true })
   public deletedUTCTime?: Date
 }

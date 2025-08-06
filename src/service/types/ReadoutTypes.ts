@@ -30,26 +30,3 @@ export class AddReadoutError {
   @Field()
   errDetail!: string
 }
-
-@InputType()
-export class UpdateReadout {
-  @Field(() => BigScalar)
-  value?: Big
-
-  @Field(() => ErrCode, { nullable: true })
-  errCode?: ErrCode | null
-
-  @Field({ nullable: true })
-  errDetail?: string | null
-
-  @Field(() => GraphQLISODateTime)
-  timestampUTC?: Date
-}
-
-@InputType()
-export class UpdateReadoutError {
-  @Field(() => GraphQLISODateTime)
-  timestampUTC!: Date
-
-  
-}

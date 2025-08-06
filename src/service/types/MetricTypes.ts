@@ -4,23 +4,20 @@ import { Metric } from "../models";
 
 @InputType()
 export class AddMetric implements Partial<Metric> {
-  @Field()
+  @Field(() => MetricType)
   type!: MetricType
 
-  @Field()
+  @Field(() => Func)
   func!: Func
 
-  @Field()
+  @Field(() => Boolean)
   hasPhysicalDisplay: boolean = false
-  
-  @Field()
-  autoReadoutEnabled: boolean = false
 
-  @Field()
-  mbusValueRecordId?: number
+  @Field(() => Int, { nullable: true })
+  mbusValueRecordId?: number | null
 
-  @Field()
-  mbusDecimalShift?: number
+  @Field(() => Int, { nullable: true })
+  mbusDecimalShift?: number | null
 }
 
 @ArgsType()

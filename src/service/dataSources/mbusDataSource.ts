@@ -11,7 +11,12 @@ export type MbusDataSourceConfigOptions = {
   timeout: number
 }
 
-export default function configureMbusDataSource(config: MbusDataSourceConfigOptions) {
+export type MbusDataSource = {
+  readout: (db: DataSource) => Promise<void>,
+  mbus: MbusReadout
+}
+
+export default function configureMbusDataSource(config: MbusDataSourceConfigOptions): MbusDataSource {
   logger.debug(`[MBusReadout] Configuring (${JSON.stringify(config)})`)
   const mbus = new MbusReadout(config)
 
@@ -35,7 +40,7 @@ export default function configureMbusDataSource(config: MbusDataSourceConfigOpti
     logger.debug(JSON.stringify(metrics))
 
     const list: ReadSlaveQuery[] = []
-
+  
     for (const m of metrics) {
       // Skip if aut readout is not enabled for Measurement Point
       if (!m.measPoint.autoReadoutEnabled) continue
@@ -94,6 +99,7 @@ export default function configureMbusDataSource(config: MbusDataSourceConfigOpti
         readout.metric = metric
         readout.source = ReadoutSource.MBUS
         readout.meterUTCTimestamp = rec.timestamp ?? new Date()
+        readout.value = new Big(0)
 
         if (slave.error || rec.error) {
           readout.type = ReadoutType.ERROR
@@ -119,7 +125,8 @@ export default function configureMbusDataSource(config: MbusDataSourceConfigOpti
   }
 
   return {
-    readout
+    readout,
+    mbus
   }
 
 }
