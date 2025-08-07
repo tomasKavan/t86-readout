@@ -49,6 +49,9 @@ export class AddMeasPoint {
 
 @InputType()
 export class UpdateMeasPoint {
+  @Field(() => ID, { nullable: true })
+  id?: string
+
   @Field(() => String, { nullable: true })
   name?: string
 
