@@ -5,7 +5,8 @@ import {
   PrimaryGeneratedColumn, 
   CreateDateColumn, 
   UpdateDateColumn, 
-  DeleteDateColumn 
+  DeleteDateColumn, 
+  Index
 } from 'typeorm'
 import { Field, GraphQLISODateTime, ID, Int, ObjectType } from 'type-graphql'
 import Big from 'big.js'
@@ -15,6 +16,8 @@ import { Metric } from './Metric'
 import { BigScalar } from '../scalars/BigScalar'
 
 @Entity()
+@Index('idx_correction_event_metric', ['serviceEvent', 'metric'])
+@Index('idx_correction_event_metric_deleted', ['serviceEvent', 'metric', 'deletedUTCTime'])
 @ObjectType()
 export class Correction {
   @PrimaryGeneratedColumn()

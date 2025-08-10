@@ -3,6 +3,7 @@ import {
   CreateDateColumn, 
   DeleteDateColumn, 
   Entity, 
+  Index, 
   ManyToOne, 
   PrimaryGeneratedColumn, 
   UpdateDateColumn 
@@ -39,6 +40,8 @@ registerEnumType(ErrCode, {
 })
 
 @Entity()
+@Index('idx_readout_metric_ts_desc', ['metric', 'deletedUTCTime', 'meterUTCTimestamp'])
+@Index('idx_readout_metric_ts_desc_value', ['metric', 'meterUTCTimestamp', 'value'])
 @ObjectType()
 export class Readout {
   @PrimaryGeneratedColumn()

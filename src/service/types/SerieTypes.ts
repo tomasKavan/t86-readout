@@ -1,5 +1,4 @@
 import { Field, GraphQLISODateTime, ID, InputType } from 'type-graphql'
-import { GraphQLTimeZone } from 'graphql-scalars'
 
 import { Sampling } from '../models/Serie'
 
@@ -16,7 +15,4 @@ export class QuerySerie {
 
   @Field(() => [ID])
   metricIds: number[] = []
-
-  @Field(() => GraphQLTimeZone, { nullable: true })
-  public timeZone?: string
 }

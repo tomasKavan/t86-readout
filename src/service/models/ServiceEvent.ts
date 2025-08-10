@@ -3,6 +3,7 @@ import {
   CreateDateColumn, 
   DeleteDateColumn, 
   Entity, 
+  Index, 
   ManyToOne, 
   OneToMany, 
   PrimaryGeneratedColumn, 
@@ -22,6 +23,7 @@ registerEnumType(Type, {
 })
 
 @Entity()
+@Index('idx_service_event_occured', ['occuredUTCTime'])
 @ObjectType()
 export class ServiceEvent {
   @PrimaryGeneratedColumn()
