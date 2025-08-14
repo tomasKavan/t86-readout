@@ -23,7 +23,7 @@ export class MeasPointResolver {
    * Returns list of all measurement points 
    *
    * All metrics an service events are available. Won't resolve Metric's readouts or corrections.
-   * Filtering or pagination isn possible. There is only limited amount of points expected.
+   * Filtering or pagination isnt possible. There is only limited amount of points expected.
    * 
    * @param ctx GraphQL Server context (passed by Apollo server)
    * @returns List of all measurement points.
@@ -222,7 +222,7 @@ export class MeasPointResolver {
       // If there are some younger readouts, force argument must be set
       if (rots.length && !force) {
         throw new GraphQLError(`There are younger Readouts (count: ${rots.length}) than ${data.occuredUTCTime} and force atribut is not set. Meter change request is thus invalid.`, {
-          extensions: { code: ApolloServerErrorCode.BAD_USER_INPUT }
+          extensions: { code: 'HAS_SOME_READOUTS' }
         })
       }
 
@@ -377,7 +377,7 @@ export class MeasPointResolver {
       })
       if (rots.length && !force) {
         throw new GraphQLError(`MeasPoint (ID${id}) has younger readouts than ${se.occuredUTCTime}, but force attribute is not set.`, {
-          extensions: { code: ApolloServerErrorCode.BAD_USER_INPUT }
+          extensions: { code: 'HAS_SOME_READOUTS' }
         })
       }
 
@@ -407,7 +407,7 @@ export class MeasPointResolver {
    * @returns Instance of Measurement Point with autoReadout attribute adjusted 
    */
   @Mutation(() => MeasPoint)
-  async enableMetricAutoReadout(
+  async enableAutoReadout(
     @Arg('id', () => ID) id: string,
     @Ctx() ctx: ApiContext
   ): Promise<MeasPoint> {
@@ -437,7 +437,7 @@ export class MeasPointResolver {
    * @returns Instance of Measurement Point with autoReadout attribute adjusted 
    */
   @Mutation(() => MeasPoint)
-  async disableMetricAutoReadout(
+  async disableAutoReadout(
     @Arg('id', () => ID) id: string,
     @Ctx() ctx: ApiContext
   ): Promise<MeasPoint> {
@@ -501,7 +501,7 @@ export class MeasPointResolver {
       
       if (agRots.length && !force) {
         throw new GraphQLError(`MeasPoint (ID${id}) has readouts (cnt: ${agRots.length}), but force attribute is not set.`, {
-          extensions: { code: ApolloServerErrorCode.BAD_USER_INPUT }
+          extensions: { code: 'HAS_SOME_READOUTS' }
         })
       }
 

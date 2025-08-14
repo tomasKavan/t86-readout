@@ -1,4 +1,4 @@
-import { Args, Arg, Ctx, Resolver, Query, Mutation, ID } from "type-graphql";
+import { Args, Arg, Ctx, Resolver, Query, Mutation, ID, registerEnumType } from "type-graphql";
 import { Correction, MeasPoint, Metric, Readout } from "../models";
 import { AddMetric, GetMetric, GetMetrics, GetWithReadings } from "../types/MetricTypes";
 import { ApiContext } from "../graphqlServer";
@@ -159,7 +159,7 @@ export class MetricResolver {
       })
       if (count && !force) {
         throw new GraphQLError(`Can't delete Metric with ID ${id}. There is ${count} readouts, but force param is not set.`, {
-          extensions: { code: ApolloServerErrorCode.BAD_USER_INPUT }
+          extensions: { code: 'HAS_SOME_READOUTS' }
         })
       }
 
