@@ -13,6 +13,8 @@ import { MoreThanOrEqual } from "typeorm"
 import { Type } from "../models/ServiceEvent"
 import { logger } from "../logger"
 
+const DETAIL_RELATIONS = ['metrics', 'serviceEvents', 'serviceEvents.corrections', 'serviceEvents.corrections.metric']
+
 /**
  * Resolver for Measurement Points
  */
@@ -53,7 +55,7 @@ export class MeasPointResolver {
   ): Promise<MeasPoint> {
     const mp = await ctx.ds.getRepository(MeasPoint).findOne({ 
       where : { id },
-      relations: ['metrics', 'serviceEvents']
+      relations: DETAIL_RELATIONS
     })
     
     if (!mp) {
@@ -89,12 +91,17 @@ export class MeasPointResolver {
       }
 
       const mp = mprep.create(data)
+      await mprep.save(mp)
+
+      const mpres = await trn.getRepository(MeasPoint).findOneOrFail({ 
+        where : { id: data.id },
+        relations: DETAIL_RELATIONS
+      })
 
       logger.info(`[MeasPointResolver] ID ${mp.id} Added with ${mp.metrics.length} metrics.`)
       logger.debug(`[MeasPointResolver] -- added data: ${data}`)
 
-      await mprep.save(mp)
-      return mp
+      return mpres
     })
   }
 
@@ -121,13 +128,19 @@ export class MeasPointResolver {
 
       try { 
         const mp = await mprep.findOneByOrFail({ id: id })
+        
         updateDefined(mp, data)
         await mprep.save(mp)
+
+        const mpres = await trn.getRepository(MeasPoint).findOneOrFail({ 
+          where : { id },
+          relations: DETAIL_RELATIONS
+        })
 
         logger.info(`[MeasPointResolver] ID ${id} Updated`)
         logger.debug(`[MeasPointResolver] -- changed data: ${data}`)
 
-        return mp
+        return mpres
       } catch (e) {
         throw new GraphQLError(`MeasPoint with the id [${id}] not found`, {
           extensions: { code: ApolloServerErrorCode.BAD_USER_INPUT }
@@ -350,7 +363,7 @@ export class MeasPointResolver {
     return await ctx.ds.transaction(async trn => {
       const mp = await trn.getRepository(MeasPoint).findOne({
         where: { id: id },
-        relations: ['serviceEvents', 'metrics', 'serviceEvents.corrections']
+        relations: DETAIL_RELATIONS
       })
 
       if (!mp) {

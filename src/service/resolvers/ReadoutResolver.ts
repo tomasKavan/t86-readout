@@ -45,7 +45,7 @@ export class ReadoutResolver {
     @Arg('take', () => Int) take: number,
     @Arg('from', () => GraphQLISODateTime, { nullable: true }) from?: Date,
     @Arg('to', () => GraphQLISODateTime, { nullable: true }) to?: Date,
-    @Arg('metricIds', () => [Int], { nullable: true }) metricIds?: [number]
+    @Arg('metricIds', () => [ID], { nullable: true }) metricIds?: [number]
   ): Promise<ReadoutList> {
     return ctx.ds.transaction(async trn => {
       // Construct where clause
@@ -98,9 +98,15 @@ export class ReadoutResolver {
       r.type = Type.READOUT
     
       const res = await rorep.save(r)
+
+      const resre = await rorep.findOneOrFail({
+        where: { id: res.id },
+        relations: ['metric', 'metric.measPoint']
+      })
+
       logger.info(`[ReadoutResolver] ID ${res.id}, Metric ${data.metricId} stored with value ${data.value} at ${data.timestampUTC}.`)
 
-      return res
+      return resre
     })
   }
 
@@ -160,10 +166,16 @@ export class ReadoutResolver {
       r.errDetail = data.errDetail
     
       const res = await rorep.save(r)
+
+      const resre = await rorep.findOneOrFail({
+        where: { id: res.id },
+        relations: ['metric', 'metric.measPoint']
+      })
+
       logger.info(`[ReadoutResolver] ID ${res.id}, Metric ${data.metricId} stored Error ${data.errCode} at ${data.timestampUTC}.`)
       logger.debug(`[ReadoutResolver] -- details: ${data.errDetail}`)
 
-      return res
+      return resre
     })
   }
 
