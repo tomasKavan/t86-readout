@@ -277,6 +277,8 @@ export class MeasPointResolver {
         }
       }
 
+      console.log(corrs)
+
       // Create Service Event object and fill it
       const se: Partial<ServiceEvent> = {}
       se.measPoint = { id: mp.id } as MeasPoint
@@ -401,7 +403,7 @@ export class MeasPointResolver {
         meterUTCTimestamp: MoreThanOrEqual(se.occuredUTCTime)
       })
 
-      logger.info(`[MeasPointResolver] ID ${se.measPoint.id} - Reverted Service Event ID ${se.id}.`)
+      logger.info(`[MeasPointResolver] ID ${id} - Reverted Service Event ID ${se.id}.`)
       logger.debug(`[MeasPointResolver] -- soft remove of ${se.corrections.length} corrections`)
       logger.debug(`[MeasPointResolver] -- soft remove of readouts younger than ${se.occuredUTCTime}, count ${res.affected}`)
 

@@ -46,7 +46,7 @@ export class Correction {
     scale: 3,
     default: 0,
     transformer: {
-      to: (v: Big) => v.toString(),
+      to: (v: Big) => v instanceof Big ? v.toString() : v,
       from: (v: string) => v === null ? null : new Big(v) 
     } 
   })
@@ -59,7 +59,7 @@ export class Correction {
     scale: 3,
     nullable: true,
     transformer: {
-      to: (v: Big) => v.toString(),
+      to: (v: Big) => v instanceof Big ? v.toString() : v,
       from: (v: string) => v === null ? null : new Big(v)
     } 
   })
@@ -72,7 +72,7 @@ export class Correction {
     scale: 3,
     nullable: true,
     transformer: {
-      to: (v: Big) => v.toString(),
+      to: (v: Big) => v instanceof Big ? v.toString() : v,
       from: (v: string) => v === null ? null : new Big(v)
     } 
   })
@@ -98,15 +98,6 @@ export class Correction {
   })
   @Field(() => GraphQLISODateTime)
   public createdUTCTime!: Date
-
-  @UpdateDateColumn({
-    type: 'datetime',
-    precision: 0,
-    default: () => 'CURRENT_TIMESTAMP(0)',
-    onUpdate: 'CURRENT_TIMESTAMP(0)'
-  })
-  @Field(() => GraphQLISODateTime)
-  public updatedUTCTime!: Date
 
   @DeleteDateColumn({
     type: 'datetime',

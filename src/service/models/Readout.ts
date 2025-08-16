@@ -96,15 +96,6 @@ export class Readout {
   @Field(() => GraphQLISODateTime)
   public createdUTCTime!: Date
 
-  @UpdateDateColumn({
-    type: 'datetime',
-    precision: 0,
-    default: () => 'CURRENT_TIMESTAMP(0)',
-    onUpdate: 'CURRENT_TIMESTAMP(0)'
-  })
-  @Field(() => GraphQLISODateTime)
-  public updatedUTCTime!: Date
-
   @DeleteDateColumn({
     type: 'datetime',
     precision: 0
