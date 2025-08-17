@@ -1,7 +1,12 @@
 {
   "extends": "./tsconfig.json",
-  "compilerOptions": { 
-    "module": "CommonJS", 
-    "moduleResolution": "Node" 
-  }
+  "compilerOptions": {
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "outDir": "dist-mig",
+    "rootDir": "src",
+    "declaration": false,
+    "sourceMap": true
+  },
+  "include": ["src/**/*"]
 }

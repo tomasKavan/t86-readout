@@ -1,9 +1,11 @@
 import config from '../config'
 import configureDataSource from './dbDataSource'
 
+console.log(config.db)
+
 const ds = configureDataSource(config.db, true, {
-  entities: ['src/service/models/**/*.ts'],
-  migrations: ['src/service/migrations/**/*.ts']
+  entities: ['dist-mig/service/models/**/*.js'],
+  migrations: ['dist-mig/service/migrations/**/*.js']
 })
 
 export default ds

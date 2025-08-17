@@ -36,20 +36,19 @@
     "yargs": "^17.7.2"
   },
   "scripts": {
-    "clean": "rimraf dist/*",
+    "clean": "rimraf dist/* dist-mig/* ",
     "tsc": "tsc -b",
+    "tsc:typeorm": "tsc -b tsconfig.typeorm.json",
     "build": "npm-run-all clean tsc",
+    "build:typeorm": "npm-run-all clean tsc:typeorm",
     "watch": "tsc-watch --onSuccess \"node dist/service/index\" --onFailure \"echo Compilation Failed\" --compiler typescript/bin/tsc",
     "dev": "npm-run-all build watch",
     "start": "node dist/service/index.js",
 
-    "db:migrate:gen": "TS_NODE_PROJECT=tsconfig.typeorm.json typeorm-ts-node-commonjs -d src/service/dataSources/dbDataSource.typeormcli.dev.ts migration:generate src/migrations/$npm_config_name",
-    "db:migrate:run": "TS_NODE_PROJECT=tsconfig.typeorm.json typeorm-ts-node-commonjs -d src/service/dataSources/dbDataSource.typeormcli.dev.ts migration:run",
-    "db:migrate:revert": "TS_NODE_PROJECT=tsconfig.typeorm.json typeorm-ts-node-commonjs -d src/service/dataSources/dbDataSource.typeormcli.dev.ts migration:revert",
-    "db:migrate:show": "TS_NODE_PROJECT=tsconfig.typeorm.json typeorm-ts-node-commonjs -d src/service/dataSources/dbDataSource.typeormcli.dev.ts migration:show",
-
-    "db:migrate:run:prod": "node --enable-source-maps ./node_modules/typeorm/cli.js -d dist/service/dataSources/dbDataSource.typeormcli.prod.js migration:run",
-    "db:migrate:revert:prod": "node --enable-source-maps ./node_modules/typeorm/cli.js -d dist/service/dataSources/dbDataSource.typeormcli.prod.js migration:revert"
+    "db:migrate:gen": "npm run build:typeorm && node ./node_modules/typeorm/cli.js -d dist-mig/service/dataSources/dbDataSource.typeormcli.js migration:generate src/service/migrations/$npm_config_name",
+    "db:migrate:run": "npm run build:typeorm && node ./node_modules/typeorm/cli.js -d dist-mig/service/dataSources/dbDataSource.typeormcli.js migration:run",
+    "db:migrate:revert": "npm run build:typeorm && node ./node_modules/typeorm/cli.js -d dist-mig/service/dataSources/dbDataSource.typeormcli.js migration:revert",
+    "db:show": "npm run build:typeorm && node ./node_modules/typeorm/cli.js -d dist-mig/service/dataSources/dbDataSource.typeormcli.js migration:show"
   },
   "main": "dist/service/index.js",
   "bin": {

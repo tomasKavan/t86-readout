@@ -7,21 +7,11 @@ import {
   PrimaryColumn, 
   UpdateDateColumn 
 } from "typeorm"
-import { Field, GraphQLISODateTime, ID, Int, ObjectType, registerEnumType } from "type-graphql"
+import { Field, GraphQLISODateTime, ID, Int, ObjectType } from "type-graphql"
 
 import { Metric } from "./Metric"
 import { ServiceEvent } from "./ServiceEvent"
 import { Subject, SubjectSpec } from "./MetricEnums"
-
-registerEnumType(Subject, {
-  name: 'MeasPointSubject',
-  description: 'Subject of measurements observed by meter on measurement point'
-})
-
-registerEnumType(SubjectSpec, {
-  name: 'MeasPointSubjectSpecifier',
-  description: 'Close specificationon of MeasPoint Subject. Can be null'
-})
 
 @Entity()
 @ObjectType()

@@ -9,22 +9,12 @@ import {
   PrimaryGeneratedColumn, 
   UpdateDateColumn 
 } from "typeorm"
-import { Field, GraphQLISODateTime, ID, Int, ObjectType, registerEnumType } from "type-graphql"
+import { Field, GraphQLISODateTime, ID, Int, ObjectType } from "type-graphql"
 
 import { MeasPoint } from "./MeasPoint"
 import { MetricType, Func } from "./MetricEnums"
 import { Readout } from "./Readout"
 import { Correction } from "./Correction"
-
-registerEnumType(MetricType, {
-  name: 'MetricType',
-  description: 'Recurent event observed/measured by metric. Like consumption or time elapsed.'
-})
-
-registerEnumType(Func, {
-  name: 'MetricFunc',
-  description: 'Type of function related to metric. Describes if observed values are instantenious, summary or something else.'
-})
 
 @Entity()
 @ObjectType()
