@@ -38,10 +38,18 @@
   "scripts": {
     "clean": "rimraf dist/*",
     "tsc": "tsc -b",
-    "dev": "npm-run-all build watch",
     "build": "npm-run-all clean tsc",
     "watch": "tsc-watch --onSuccess \"node dist/service/index\" --onFailure \"echo Compilation Failed\" --compiler typescript/bin/tsc",
-    "start": "node dist/cli/index.js"
+    "dev": "npm-run-all build watch",
+    "start": "node dist/service/index.js",
+
+    "db:migrate:gen": "TS_NODE_PROJECT=tsconfig.typeorm.json typeorm-ts-node-commonjs -d src/service/dataSources/dbDataSource.typeormcli.dev.ts migration:generate src/migrations/$npm_config_name",
+    "db:migrate:run": "TS_NODE_PROJECT=tsconfig.typeorm.json typeorm-ts-node-commonjs -d src/service/dataSources/dbDataSource.typeormcli.dev.ts migration:run",
+    "db:migrate:revert": "TS_NODE_PROJECT=tsconfig.typeorm.json typeorm-ts-node-commonjs -d src/service/dataSources/dbDataSource.typeormcli.dev.ts migration:revert",
+    "db:migrate:show": "TS_NODE_PROJECT=tsconfig.typeorm.json typeorm-ts-node-commonjs -d src/service/dataSources/dbDataSource.typeormcli.dev.ts migration:show",
+
+    "db:migrate:run:prod": "node --enable-source-maps ./node_modules/typeorm/cli.js -d dist/service/dataSources/dbDataSource.typeormcli.prod.js migration:run",
+    "db:migrate:revert:prod": "node --enable-source-maps ./node_modules/typeorm/cli.js -d dist/service/dataSources/dbDataSource.typeormcli.prod.js migration:revert"
   },
   "main": "dist/service/index.js",
   "bin": {

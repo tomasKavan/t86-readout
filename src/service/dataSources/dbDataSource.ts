@@ -1,4 +1,4 @@
-import { DataSource, LoggerOptions } from 'typeorm'
+import { DataSource, DataSourceOptions, LoggerOptions } from 'typeorm'
 import { modelsArray } from '../models/index'
 import { logger } from '../logger'
 
@@ -11,8 +11,33 @@ export type DbDataSourceConfigOptions = {
     logging: LoggerOptions
 }
 
-export default function configureDataSource (config: DbDataSourceConfigOptions) {
-  return new DataSource({
+export default function configureDataSource (
+  config: DbDataSourceConfigOptions, 
+  useNativeLogger: boolean = false, 
+  configRewrite?: Partial<DataSourceOptions>
+) {
+  const l = useNativeLogger ? undefined : {
+    logQuery: (query: string, params: any[]) => {
+      logger.debug(`QUERY: ${query} -- ${JSON.stringify(params)}`)
+    },
+    logQueryError: (error: string | Error, query: string, params: any[] | undefined) => {
+      logger.error(`QUERY ERROR: ${error} -- ${query} -- ${JSON.stringify(params)}`)
+    },
+    logQuerySlow: (time: number, query: string, params: any[] | undefined) => {
+      logger.warn(`SLOW QUERY: ${time}ms -- ${query} -- ${JSON.stringify(params)}`)
+    },
+    log: (level: any, message: any) => {
+      logger.log(level as any, message)
+    },
+    logSchemaBuild: (message: string, queryRunner: any) => {
+      logger.debug(`SCHEMA BUILD: ${message}`)
+    },
+    logMigration: (message: string, queryRunner: any) => {
+      logger.info(`MIGRATION: ${message}`)
+    }
+  }
+
+  let cfg: DataSourceOptions = {
     type: 'mysql',
     host: config.host,
     port: config.port,
@@ -20,30 +45,21 @@ export default function configureDataSource (config: DbDataSourceConfigOptions) 
     password: config.pass,
     database: config.name,
     entities: modelsArray,
-    synchronize: true,
+    migrations: ['dist/migrations/*.js'],
+    migrationsTableName: 'typeorm_migrations',
+    synchronize: false,
     logging: config.logging,
-    logger: {
-      logQuery: (query: string, params: any[]) => {
-        logger.debug(`QUERY: ${query} -- ${JSON.stringify(params)}`)
-      },
-      logQueryError: (error: string | Error, query: string, params: any[] | undefined) => {
-        logger.error(`QUERY ERROR: ${error} -- ${query} -- ${JSON.stringify(params)}`)
-      },
-      logQuerySlow: (time: number, query: string, params: any[] | undefined) => {
-        logger.warn(`SLOW QUERY: ${time}ms -- ${query} -- ${JSON.stringify(params)}`)
-      },
-      log: (level: any, message: any) => {
-        logger.log(level as any, message)
-      },
-      logSchemaBuild: (message: string, queryRunner: any) => {
-        logger.debug(`SCHEMA BUILD: ${message}`)
-      },
-      logMigration: (message: string, queryRunner: any) => {
-        logger.info(`MIGRATION: ${message}`)
-      }
-    },
+    logger: l,
     
     // Set TypeORM DB <-> JS Date parsion to UTC. All dates in DB are stored as UTC!!!
     timezone: 'Z' 
-  })
+  }
+  if (configRewrite) {
+    cfg = {
+      ...cfg,
+      ...(configRewrite as typeof cfg)
+    }
+  }
+
+  return new DataSource(cfg)
 }
